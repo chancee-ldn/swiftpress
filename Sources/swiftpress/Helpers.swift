@@ -7,99 +7,30 @@
 
 import Foundation
 
-/*
-func makePostNew(string: String) {
-    let markdown: String = string
-    let parser = MarkdownParser()
-    let result = parser.parse(markdown)
 
-    //var post = Post(title: result.metadata["title"]!, date: result.metadata["date"]!, link: result.metadata["link"]!, body: result.html)
-    
-    //let titleString = result.metadata["title"]
-    //print ("title string: \(titleString)")
-    
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "dd-MM-yyyy"
-    
-    let dateString = result.metadata["lang"]
-    //let date = dateFormatter.date(from: dateString)
-    
-    //let linkString = result.metadata["link"]
-    let bodyString = result.html
-    
-    //print ("new: ", titleString, dateString, linkString, bodyString)
-    print ("date: ", dateString)
-    print ("bodyString: ", bodyString)
-    print ("result: ", result)
-    
-    let html = result.html
-}
-*/
 func makeDate(raw: String) -> Date {
-    let array = raw.components(separatedBy: ": ")
-    let data = array[1]
-    
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "dd MMM yyyy HH:mm:ss z"
-   // dateFormatter.dateFormat = "dd-MM-yyyy"
-    
-    let date = dateFormatter.date(from: data)
-    
+    let date = dateFormatter.date(from: raw)
     return date!
-}
-
-// make a title from a markdown document string
-func makeTitle(raw: String) -> String {
-    let array = raw.components(separatedBy: ": ")
-    let data = String(array[1])
-    
-    return data
-}
-
-// wrap a primary link with the posts title
-func makeLink(link: String, title: String) -> String {
-    let array = link.components(separatedBy: ": ")
-    let d = array[1]
-    let data = "[\(title)](\(d))"
-    return data
-}
-func makeRawLink(link: String, title: String) -> String {
-    let array = link.components(separatedBy: ": ")
-    let data = array[1]
-    return data
 }
 
 
 func makePost(data: String) -> Post {
     
-    print ("Creating a post:")
-    
     let markdown: String = data
     let parser = MarkdownParser()
     let result = parser.parse(markdown)
 
-    //var post = Post(title: result.metadata["title"]!, date: result.metadata["date"]!, link: result.metadata["link"]!, body: result.html)
+    let title = result.metadata["title"]!
+    let date = makeDate(raw: result.metadata["date"]!)  // NOTE make this a try/catch for a malformed date
+    var link = ""
+    if result.metadata["link"] != nil {
+        link = result.metadata["link"]!
+    }
+    let body = result.html
     
-    let titleString = result.metadata["title"]
-    print ("!!! title string: \(titleString)")
-    
-    
-    //makePostNew(string: data)
-    
-    let raw = data.components(separatedBy: "\n")
-    let title = makeTitle(raw: (raw[0]))   // title
-    let date = makeDate(raw: (raw[1]))     // date
-    let link = makeRawLink(link: (raw[5]), title: title)
-    var body = [String]()
-       var lineIndex = 1
-       data.enumerateLines { (line, stop) -> () in
-           lineIndex += 1
-           if lineIndex >= 8 {
-               body.append(line)
-           }
-       }
-    
-    let post = Post(title: title, date: date, link: link, body: body.joined(separator: "\n"))
+    let post = Post(title: title, date: date, link: link, body: body)
     return post
 }
 
@@ -159,15 +90,17 @@ func writeArchiveList(postsPath: String, templatePath: String) {
     }
 }
 
+
 // Return an array of posts to do something else with...
 func returnAllPosts(directory: String) -> [Post] {
+    
     var posts = [Post]()
     
     let fileManager = FileManager.default
     let location = String(NSString(string: "\(directory)").expandingTildeInPath)
     let e = fileManager.enumerator(atPath: location)
     
-    print ("\(String(describing: e)), \(location)")
+    print ("iterating posts in: \(location)")
     
     for file in e! {
         let path = location + "/\(file)"
@@ -175,25 +108,9 @@ func returnAllPosts(directory: String) -> [Post] {
         
         if fileString.first != "." { // if the file does not start with a dot...
             let data = try? String(contentsOfFile: path, encoding: String.Encoding.utf8)
-            let arrayIndex = data?.components(separatedBy: "\n")
-            
-            let markdown: String = data!
-            let parser = MarkdownParser()
-            let result = parser.parse(markdown)
-
-            
-            print ("metaData: \(result.metadata)")
-            let title = result.metadata["title"]
-            let date = makeDate(raw: result.metadata["date"]!)  // NOTE make this a try/catch for a malformed date
-            let link = makeRawLink(link: result.metadata["link"], title: title)
-            let body = result.html
-            
-            // create a post object
-            let post = Post(title: title, date: date, link: link, body: body.joined(separator: "\n"))
+            let post = makePost(data: data!)
             posts.append(post)
         }
-        
-        
     }
     return posts
 }
@@ -218,7 +135,6 @@ func iteratePostDirectory(directory: String, outputPath: String, template: Strin
 //  outputs the most recent x number of posts to a front "page"
 func writeFrontPage(directory: String, outputPath: String, template: String, numberOfPosts: Int) {
     let posts = returnAllPosts(directory: directory)
-    print ("sorting: ", posts.count, "posts")
     var postDictionary = [Date: [Post]]()        // All the posts
     
     for post in posts {
@@ -243,8 +159,6 @@ func writeFrontPage(directory: String, outputPath: String, template: String, num
     let templatePath = String(NSString(string:"\(template)/index.html").expandingTildeInPath)
     do {
         let filename = String(NSString(string:"\(outputPath)").expandingTildeInPath + "/index.html")
-        
-        
         let templateData = try String(contentsOfFile: templatePath, encoding: String.Encoding.utf8)
         var template = templateData.components(separatedBy: "\n")
         
@@ -256,9 +170,7 @@ func writeFrontPage(directory: String, outputPath: String, template: String, num
             for group in frontPage.reversed() {
                 
                 for post in group.value {
-                    
-                    let parser = MarkdownParser()
-                    let body = parser.html(from: post.body)
+                    let body = post.body
                     template.insert(body, at: id)
                     
                     ///

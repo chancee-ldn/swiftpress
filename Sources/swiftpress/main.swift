@@ -46,6 +46,7 @@ do {
     try tool.run()
 } catch {
     print("Whoops! An error occurred: \(error)")
+    writeFrontPage(directory: "~/Production/chanc.ee/.drafts", outputPath: "~/Production/chanc.ee", template: "~/Production/chanc.ee/.templates", numberOfPosts: 2)
 }
 
 
