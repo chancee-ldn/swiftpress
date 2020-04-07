@@ -8,12 +8,9 @@
 import Foundation
 //import Ink
 
-struct Post {
-    
+struct Post {    
     var title: String
     var date: Date
     var link: String
     var body: String
-    
-    
 }

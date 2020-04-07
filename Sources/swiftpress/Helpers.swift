@@ -7,13 +7,41 @@
 
 import Foundation
 
+/*
+func makePostNew(string: String) {
+    let markdown: String = string
+    let parser = MarkdownParser()
+    let result = parser.parse(markdown)
 
+    //var post = Post(title: result.metadata["title"]!, date: result.metadata["date"]!, link: result.metadata["link"]!, body: result.html)
+    
+    //let titleString = result.metadata["title"]
+    //print ("title string: \(titleString)")
+    
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "dd-MM-yyyy"
+    
+    let dateString = result.metadata["lang"]
+    //let date = dateFormatter.date(from: dateString)
+    
+    //let linkString = result.metadata["link"]
+    let bodyString = result.html
+    
+    //print ("new: ", titleString, dateString, linkString, bodyString)
+    print ("date: ", dateString)
+    print ("bodyString: ", bodyString)
+    print ("result: ", result)
+    
+    let html = result.html
+}
+*/
 func makeDate(raw: String) -> Date {
     let array = raw.components(separatedBy: ": ")
     let data = array[1]
     
     let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "dd-MM-yyyy"
+    dateFormatter.dateFormat = "dd MMM yyyy HH:mm:ss z"
+   // dateFormatter.dateFormat = "dd-MM-yyyy"
     
     let date = dateFormatter.date(from: data)
     
@@ -43,6 +71,21 @@ func makeRawLink(link: String, title: String) -> String {
 
 
 func makePost(data: String) -> Post {
+    
+    print ("Creating a post:")
+    
+    let markdown: String = data
+    let parser = MarkdownParser()
+    let result = parser.parse(markdown)
+
+    //var post = Post(title: result.metadata["title"]!, date: result.metadata["date"]!, link: result.metadata["link"]!, body: result.html)
+    
+    let titleString = result.metadata["title"]
+    print ("!!! title string: \(titleString)")
+    
+    
+    //makePostNew(string: data)
+    
     let raw = data.components(separatedBy: "\n")
     let title = makeTitle(raw: (raw[0]))   // title
     let date = makeDate(raw: (raw[1]))     // date
@@ -116,107 +159,263 @@ func writeArchiveList(postsPath: String, templatePath: String) {
     }
 }
 
-
-func iteratePostDirectory(directory: String) {
+// Return an array of posts to do something else with...
+func returnAllPosts(directory: String) -> [Post] {
+    var posts = [Post]()
+    
     let fileManager = FileManager.default
     let location = String(NSString(string: "\(directory)").expandingTildeInPath)
     let e = fileManager.enumerator(atPath: location)
     
+    print ("\(String(describing: e)), \(location)")
+    
     for file in e! {
         let path = location + "/\(file)"
-        let data = try? String(contentsOfFile: path, encoding: String.Encoding.utf8)
-        let arrayIndex = data?.components(separatedBy: "\n")
+        let fileString = file as! String
         
-        let title = makeTitle(raw: (arrayIndex?[0])!) // title
-        let date = makeDate(raw: (arrayIndex?[1])!)  // date
-        var body = [String]()
-           var lineIndex = 1
-           data?.enumerateLines { (line, stop) -> () in
-               lineIndex += 1
-               if lineIndex >= 8 {
-                   body.append(line)
-               }
-           }
-        let link = makeRawLink(link: (arrayIndex?[5])!, title: title)
+        if fileString.first != "." { // if the file does not start with a dot...
+            let data = try? String(contentsOfFile: path, encoding: String.Encoding.utf8)
+            let arrayIndex = data?.components(separatedBy: "\n")
+            
+            let markdown: String = data!
+            let parser = MarkdownParser()
+            let result = parser.parse(markdown)
+
+            
+            print ("metaData: \(result.metadata)")
+            let title = result.metadata["title"]
+            let date = makeDate(raw: result.metadata["date"]!)  // NOTE make this a try/catch for a malformed date
+            let link = makeRawLink(link: result.metadata["link"], title: title)
+            let body = result.html
+            
+            // create a post object
+            let post = Post(title: title, date: date, link: link, body: body.joined(separator: "\n"))
+            posts.append(post)
+        }
         
+        
+    }
+    return posts
+}
+
+
+//
+//  MARK: Iterate directory
+// Goes through the specificed directory and outputs HTML via template 
+func iteratePostDirectory(directory: String, outputPath: String, template: String) {
+    let posts = returnAllPosts(directory: directory)
+    print ("all posts")
+    for post in posts {
         // create a post object
-        let post = Post(title: title, date: date, link: link, body: body.joined(separator: "\n"))
-        writePostToDirectory(data: post, outputDirectory: "~/Production/swiftpress/Tests/writings", templateDirectory: "~/Production/swiftpress/Tests/templates")
-        print (post.title)
+        writePostToDirectory(data: post, outputDirectory: outputPath, template: template)
+        print ("succesfully wrote: \(post.title)")
     }
 }
 
 
-func writePostToDirectory(data: Post, outputDirectory: String, templateDirectory: String) {
+
+//  MARK: Write front page
+//  outputs the most recent x number of posts to a front "page"
+func writeFrontPage(directory: String, outputPath: String, template: String, numberOfPosts: Int) {
+    let posts = returnAllPosts(directory: directory)
+    print ("sorting: ", posts.count, "posts")
+    var postDictionary = [Date: [Post]]()        // All the posts
+    
+    for post in posts {
+        if postDictionary[post.date] == nil {
+            postDictionary[post.date] = [post]
+        } else {
+            postDictionary[post.date]?.append(post)
+        }
+    }
+    print (postDictionary.count)
+    let frontPage = Array(postDictionary.sorted(by: { $0.0 > $1.0 }))[0...numberOfPosts]
+    for group in frontPage.reversed() {
+        print (group.key)
+        for post in group.value {
+            print (post.title)
+        }
+    }
+            
+    generateRSS(template: template, output: outputPath, posts: posts)
+    
+    // 2. Inject data into the template
+    let templatePath = String(NSString(string:"\(template)/index.html").expandingTildeInPath)
+    do {
+        let filename = String(NSString(string:"\(outputPath)").expandingTildeInPath + "/index.html")
+        
+        
+        let templateData = try String(contentsOfFile: templatePath, encoding: String.Encoding.utf8)
+        var template = templateData.components(separatedBy: "\n")
+        
+        //  2a. Find the {{post}} tag in the template
+        if let id = template.firstIndex(of: "{{posts}}") {
+            template.remove(at: id)
+            
+            // 3. Iterate through the frontpage dictionary
+            for group in frontPage.reversed() {
+                
+                for post in group.value {
+                    
+                    let parser = MarkdownParser()
+                    let body = parser.html(from: post.body)
+                    template.insert(body, at: id)
+                    
+                    ///
+                    if post.link.count > 4 {
+                        let headline = "<h2><a href=\"\(post.link)\">\(post.title)</a></h2>"
+                        template.insert(headline, at: id)
+                    } else {
+                        let title = post.title.replacingOccurrences(of: " ", with: "-")
+                        let headline = "<h2><a href=\"posts/\(title).html\">\(post.title)</a></h2>"
+                        template.insert(headline, at: id)
+                    }
+                    
+                    
+                }
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.locale = Locale(identifier: "en_GB")
+                dateFormatter.dateFormat = "dd MMM yyyy"
+                
+                let date = dateFormatter.string(from: group.key)
+                let formattedDate = "<h3>\(date)</h3>"
+                template.insert(formattedDate, at: id)
+                
+            }
+            
+            // 4. Write the template with data to a file
+            let a = template.joined(separator: "")
+            do {
+                try a.write(toFile: filename, atomically: false, encoding: String.Encoding.utf8)
+            }
+            catch {
+                print ("unable to write file to directory")
+            }
+            
+        } else {
+            print ("unable to find {{posts}} tag in template")
+        }
+
+    } catch {
+        print(error)
+    }
+}
+
+//  MARK: Generate RSS
+func generateRSS(template: String, output: String, posts: [Post]) {
+    
+    let path = String(NSString(string:"\(template)/rss.template").expandingTildeInPath)
+    do {
+        let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
+        let currentDateTime = Date()
+        
+        var items = ""
+        for post in posts {
+            
+            var title = "<item>\n\t<title>%@</title>\n"
+            title = String(format: title, post.title)
+            title = title.replacingOccurrences(of: "&", with: "&amp;")
+            
+            
+            var link = "\t<link>%@</link>\n"
+            link = String(format: link, post.link)
+            
+            var date = "\t<pubDate>%@</pubDate>\n"
+            date = String(format: date, post.date.description)
+            //var rfc822 = post.date.description.RFC822Date
+            //print ("date: \(rfc822)")
+            
+            /*
+            if let rfc822 = post.date.description.RFC822Date {
+                date = String(format: date, rfc822.description)
+            } else {
+                //print ("date: \(post.date.description.RFC822Date)")
+                //print ("raw date: \(post.date)")
+                date = String(format: date, post.date.description)
+            }
+            */
+            
+            let guid = ""
+            
+            var parser = MarkdownParser()
+            let modifier = Modifier(target: .links) { html, markdown in
+                var trim = html
+                trim = trim.replacingOccurrences(of: "&", with: "&amp;")
+                print (trim)
+                return trim
+            }
+            
+            parser.addModifier(modifier)
+            let body = parser.html(from: post.body)
+            
+            var description = "\t<description><![CDATA[%@]]>\n</description>\n</item>\n"
+            description = String(format: description, String(body))
+            //description = String(format: description, "test")
+            
+            let p = title + link + date + guid + description
+            items.append(p)
+        }
+        
+        
+        let s = String(format: template, currentDateTime.description,  items)
+        let file = String(NSString(string:"\(output)").expandingTildeInPath + "/index.xml")
+        do {
+            try s.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
+            print ("Successfully wrote RSS to directory")
+            print (s)
+        }
+        catch {
+            print ("unable to write RSS to directory")
+        }
+    } catch {
+        
+    }
+}
+
+
+//  MARK: Write Post to Directory
+func writePostToDirectory(data: Post, outputDirectory: String, template: String) {
     
     // 1. Filename and directories
     let title = data.title.replacingOccurrences(of: " ", with: "-")
-    let filename = String(NSString(string:"\(outputDirectory)").expandingTildeInPath + "\(title).html")
-    let templatePath = String(NSString(string:"\(templateDirectory)").expandingTildeInPath) + "/\("post.template")"
+    let filename = String(NSString(string:"\(outputDirectory)").expandingTildeInPath + "/\(title).html")
+    let templatePath = String(NSString(string:"\(template)").expandingTildeInPath)
     
     // 2. Inject data into the template
     do {
         let templateData = try String(contentsOfFile: templatePath, encoding: String.Encoding.utf8)
         var template = templateData.components(separatedBy: "\n")
         
-        let id = template.firstIndex(of: "{{post}}")
-        template.remove(at: id!)
-        
-        let date = data.date
-        let formattedDate = "<h4>\(date)</h4>"
-        template.insert(formattedDate, at: id!)
-        
-        let headline = "<h5>\(data.title)</h5>"
-        template.insert(headline, at: id!)
-        
-        let parser = MarkdownParser()
-        let body = parser.html(from: data.body)
-        template.insert(body, at: id!)
-        
-        // 3. Write the template with data to a file
-        let a = template.joined(separator: "")
-        do {
-            try a.write(toFile: filename, atomically: false, encoding: String.Encoding.utf8)
-        }
-        catch {
-            print ("unable to write file to directory")
+        if let id = template.firstIndex(of: "{{post}}") {
+            template.remove(at: id)
+            
+            
+            let parser = MarkdownParser()
+            let body = parser.html(from: data.body)
+            template.insert(body, at: id)
+            
+            
+            
+            let headline = "<h2>\(data.title)</h2>"
+            template.insert(headline, at: id)
+            
+            let date = data.date
+            let formattedDate = "<h3>\(date)</h3>"
+            template.insert(formattedDate, at: id)
+            
+            // 3. Write the template with data to a file
+            let a = template.joined(separator: "")
+            do {
+                try a.write(toFile: filename, atomically: false, encoding: String.Encoding.utf8)
+            }
+            catch {
+                print ("unable to write file to directory")
+            }
+        } else {
+            print ("unable to find {{post}} tag")
         }
     } catch {
         print(error)
     }
-}
-
-
-enum Colours: String {
-    case black = "\u{001B}[0;30m"
-    case red = "\u{001B}[0;31m"
-    case green = "\u{001B}[0;32m"
-    case yellow = "\u{001B}[0;33m"
-    case blue = "\u{001B}[0;34m"
-    case magenta = "\u{001B}[0;35m"
-    case cyan = "\u{001B}[0;36m"
-    case white = "\u{001B}[0;37m"
-    case base = "\u{001B}[0;0m"
-
-    func name() -> String {
-        switch self {
-        case .black: return "Black"
-        case .red: return "Red"
-        case .green: return "Green"
-        case .yellow: return "Yellow"
-        case .blue: return "Blue"
-        case .magenta: return "Magenta"
-        case .cyan: return "Cyan"
-        case .white: return "White"
-        case .base: return "Base"
-        }
-    }
-
-    static func all() -> [Colours] {
-        return [.black, .red, .green, .yellow, .blue, .magenta, .cyan, .white, .base]
-    }
-}
-
-func + (left: Colours, right: String) -> String {
-    return left.rawValue + right
 }

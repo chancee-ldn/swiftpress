@@ -6,7 +6,7 @@ public final class CommandLineTool {
     private let arguments: [String]
     private let fileManager = FileManager.default
 
-    public init(arguments: [String] = CommandLine.arguments) { 
+    public init(arguments: [String] = CommandLine.arguments) {
         self.arguments = arguments
     }
 
@@ -22,8 +22,11 @@ public final class CommandLineTool {
             
         } else if arguments[1] == "-posts" {
             print ("parsing a create posts argument")
-            iteratePostDirectory(directory: arguments[2])
-            
+            iteratePostDirectory(directory: arguments[2], outputPath: arguments[3], template: arguments[4])
+            print("2")
+        } else if arguments[1] == "-frontpage" {
+            print ("writing the front page")
+            writeFrontPage(directory: arguments[2], outputPath: arguments[3], template: arguments[4], numberOfPosts: Int(arguments[5])!)
         } else {
             print ("Unknown pipe: \n -posts ~/path/to/directoryOfPosts \n -archive ~/path/to/directoryOfPosts ~/path/to/outputDirectory \n  ")
         }
