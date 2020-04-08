@@ -46,7 +46,12 @@ do {
     try tool.run()
 } catch {
     print("Whoops! An error occurred: \(error)")
-    writeFrontPage(directory: "~/Production/chanc.ee/.drafts", outputPath: "~/Production/chanc.ee", template: "~/Production/chanc.ee/.templates", numberOfPosts: 2)
+    print ("""
+    -posts ~/posts/directory
+    -archive ~/path/to/directoryOfPosts ~/path/to/outputDirectory
+    -rss will produce an rss feed to index.xml
+    """)
+    //writeFrontPage(directory: "~/Production/chanc.ee/.drafts", outputPath: "~/Production/chanc.ee", template: "~/Production/chanc.ee/.templates", numberOfPosts: 2)
 }
 
 

@@ -13,4 +13,20 @@ struct Post {
     var date: Date
     var link: String
     var body: String
+    
+    
+    func ukDate() -> Date {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd MMM yyyy HH:mm:ss z"
+        let d = dateFormatter.date(from: date.description)
+        return d!
+    }
+    
+    func friendlyURL() -> String {
+        var c = title
+        c = c.replacingOccurrences(of: ",", with: "")
+        c = c.replacingOccurrences(of: "&", with: "&amp")
+        return c
+    }
+
 }

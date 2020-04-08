@@ -124,7 +124,7 @@ func iteratePostDirectory(directory: String, outputPath: String, template: Strin
     print ("all posts")
     for post in posts {
         // create a post object
-        writePostToDirectory(data: post, outputDirectory: outputPath, template: template)
+        writePostToDirectory(post: post, outputDirectory: outputPath, template: template)
         print ("succesfully wrote: \(post.title)")
     }
 }
@@ -161,6 +161,7 @@ func writeFrontPage(directory: String, outputPath: String, template: String, num
         let filename = String(NSString(string:"\(outputPath)").expandingTildeInPath + "/index.html")
         let templateData = try String(contentsOfFile: templatePath, encoding: String.Encoding.utf8)
         var template = templateData.components(separatedBy: "\n")
+        
         
         //  2a. Find the {{post}} tag in the template
         if let id = template.firstIndex(of: "{{posts}}") {
@@ -235,19 +236,6 @@ func generateRSS(template: String, output: String, posts: [Post]) {
             
             var date = "\t<pubDate>%@</pubDate>\n"
             date = String(format: date, post.date.description)
-            //var rfc822 = post.date.description.RFC822Date
-            //print ("date: \(rfc822)")
-            
-            /*
-            if let rfc822 = post.date.description.RFC822Date {
-                date = String(format: date, rfc822.description)
-            } else {
-                //print ("date: \(post.date.description.RFC822Date)")
-                //print ("raw date: \(post.date)")
-                date = String(format: date, post.date.description)
-            }
-            */
-            
             let guid = ""
             
             var parser = MarkdownParser()
@@ -269,13 +257,11 @@ func generateRSS(template: String, output: String, posts: [Post]) {
             items.append(p)
         }
         
-        
         let s = String(format: template, currentDateTime.description,  items)
         let file = String(NSString(string:"\(output)").expandingTildeInPath + "/index.xml")
         do {
             try s.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
             print ("Successfully wrote RSS to directory")
-            print (s)
         }
         catch {
             print ("unable to write RSS to directory")
@@ -286,48 +272,28 @@ func generateRSS(template: String, output: String, posts: [Post]) {
 }
 
 
+
+
 //  MARK: Write Post to Directory
-func writePostToDirectory(data: Post, outputDirectory: String, template: String) {
-    
+func writePostToDirectory(post: Post, outputDirectory: String, template: String) {s
     // 1. Filename and directories
-    let title = data.title.replacingOccurrences(of: " ", with: "-")
-    let filename = String(NSString(string:"\(outputDirectory)").expandingTildeInPath + "/\(title).html")
-    let templatePath = String(NSString(string:"\(template)").expandingTildeInPath)
+    let title = post.friendlyURL()
+    let path = String(NSString(string:"\(template)/post.template").expandingTildeInPath)
     
-    // 2. Inject data into the template
+    // 2. Make some content
     do {
-        let templateData = try String(contentsOfFile: templatePath, encoding: String.Encoding.utf8)
-        var template = templateData.components(separatedBy: "\n")
-        
-        if let id = template.firstIndex(of: "{{post}}") {
-            template.remove(at: id)
-            
-            
-            let parser = MarkdownParser()
-            let body = parser.html(from: data.body)
-            template.insert(body, at: id)
-            
-            
-            
-            let headline = "<h2>\(data.title)</h2>"
-            template.insert(headline, at: id)
-            
-            let date = data.date
-            let formattedDate = "<h3>\(date)</h3>"
-            template.insert(formattedDate, at: id)
-            
-            // 3. Write the template with data to a file
-            let a = template.joined(separator: "")
-            do {
-                try a.write(toFile: filename, atomically: false, encoding: String.Encoding.utf8)
-            }
-            catch {
-                print ("unable to write file to directory")
-            }
-        } else {
-            print ("unable to find {{post}} tag")
+        let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
+        let content = String(format: template, post.title, post.date.description, post.body)
+
+        let file = String(NSString(string:"\(outputDirectory)").expandingTildeInPath + "/\(title).html")
+        do {
+            try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
+            print ("Successfully wrote post to directory")
+        }
+        catch {
+            print ("unable to write post to directory")
         }
     } catch {
-        print(error)
+        print ("unable to write post to directory: \(error)")
     }
 }
