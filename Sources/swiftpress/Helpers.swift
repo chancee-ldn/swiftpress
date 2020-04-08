@@ -93,14 +93,11 @@ func writeArchiveList(postsPath: String, templatePath: String) {
 
 // Return an array of posts to do something else with...
 func returnAllPosts(directory: String) -> [Post] {
-    
     var posts = [Post]()
     
     let fileManager = FileManager.default
     let location = String(NSString(string: "\(directory)").expandingTildeInPath)
     let e = fileManager.enumerator(atPath: location)
-    
-    print ("iterating posts in: \(location)")
     
     for file in e! {
         let path = location + "/\(file)"
@@ -116,27 +113,26 @@ func returnAllPosts(directory: String) -> [Post] {
 }
 
 
-//
 //  MARK: Iterate directory
-// Goes through the specificed directory and outputs HTML via template 
-func iteratePostDirectory(directory: String, outputPath: String, template: String) {
+//  Goes through the specificed directory and outputs HTML via post.template
+func iteratePostDirectory(directory: String, outputDirectory: String, template: String) {
     let posts = returnAllPosts(directory: directory)
-    print ("all posts")
+    print ("reading \(posts.count) posts from: \(directory)")
     for post in posts {
-        // create a post object
-        writePostToDirectory(post: post, outputDirectory: outputPath, template: template)
-        print ("succesfully wrote: \(post.title)")
+        writePostToDirectory(post: post, outputDirectory: outputDirectory, template: template)
     }
+    print ("wrote \(posts.count) posts")
 }
 
 
 
 //  MARK: Write front page
-//  outputs the most recent x number of posts to a front "page"
-func writeFrontPage(directory: String, outputPath: String, template: String, numberOfPosts: Int) {
+//  outputs the most recent x number of posts to a front page
+func writeFrontPage(directory: String, outputDirectory: String, template: String, numberOfPosts: Int) {
     let posts = returnAllPosts(directory: directory)
-    var postDictionary = [Date: [Post]]()        // All the posts
     
+    //  1.  Group the posts
+    var postDictionary = [Date: [Post]]()        // All the posts
     for post in posts {
         if postDictionary[post.date] == nil {
             postDictionary[post.date] = [post]
@@ -153,67 +149,56 @@ func writeFrontPage(directory: String, outputPath: String, template: String, num
         }
     }
             
-    generateRSS(template: template, output: outputPath, posts: posts)
+    generateRSS(template: template, output: outputDirectory, posts: posts)
     
-    // 2. Inject data into the template
-    let templatePath = String(NSString(string:"\(template)/index.html").expandingTildeInPath)
+    // 2. Make some content
     do {
-        let filename = String(NSString(string:"\(outputPath)").expandingTildeInPath + "/index.html")
-        let templateData = try String(contentsOfFile: templatePath, encoding: String.Encoding.utf8)
-        var template = templateData.components(separatedBy: "\n")
+        let path = String(NSString(string:"\(template)/index.html").expandingTildeInPath)
+        let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
         
-        
-        //  2a. Find the {{post}} tag in the template
-        if let id = template.firstIndex(of: "{{posts}}") {
-            template.remove(at: id)
+        var c = ""
+        for group in frontPage {
             
-            // 3. Iterate through the frontpage dictionary
-            for group in frontPage.reversed() {
+            // Write the group date
+            let dateFormatter = DateFormatter()
+            dateFormatter.locale = Locale(identifier: "en_GB")
+            dateFormatter.dateFormat = "dd MMM yyyy"
+            
+            let date = dateFormatter.string(from: group.key)
+            let formattedDate = "<h3>\(date)</h3>"
+            c.append(formattedDate)
+            
+            // For every post in this grouped set of date:post
+            for post in group.value {
                 
-                for post in group.value {
-                    let body = post.body
-                    template.insert(body, at: id)
-                    
-                    ///
-                    if post.link.count > 4 {
-                        let headline = "<h2><a href=\"\(post.link)\">\(post.title)</a></h2>"
-                        template.insert(headline, at: id)
-                    } else {
-                        let title = post.title.replacingOccurrences(of: " ", with: "-")
-                        let headline = "<h2><a href=\"posts/\(title).html\">\(post.title)</a></h2>"
-                        template.insert(headline, at: id)
-                    }
-                    
-                    
+                if post.link == "" {
+                    let headline = "<h2><a href=\"posts/\(post.friendlyURL()).html\">\(post.title)</a></h2>"
+                    c.append(headline)
+                } else {
+                    let headline = "<h2><a href=\"\(post.link)\">\(post.title)</a></h2>"
+                    c.append(headline)
                 }
-                
-                let dateFormatter = DateFormatter()
-                dateFormatter.locale = Locale(identifier: "en_GB")
-                dateFormatter.dateFormat = "dd MMM yyyy"
-                
-                let date = dateFormatter.string(from: group.key)
-                let formattedDate = "<h3>\(date)</h3>"
-                template.insert(formattedDate, at: id)
+                c.append(post.body)
                 
             }
-            
-            // 4. Write the template with data to a file
-            let a = template.joined(separator: "")
-            do {
-                try a.write(toFile: filename, atomically: false, encoding: String.Encoding.utf8)
-            }
-            catch {
-                print ("unable to write file to directory")
-            }
-            
-        } else {
-            print ("unable to find {{posts}} tag in template")
         }
-
+        
+        
+        let content = String(format: template, c)
+        let file = String(NSString(string:"\(outputDirectory)").expandingTildeInPath + "/index.html")
+        do {
+            try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
+            print ("Successfully wrote front page to \(outputDirectory)")
+        }
+        catch {
+            print ("unable to write post to directory")
+        }
     } catch {
-        print(error)
+        print ("\(error)")
     }
+    
 }
+
 
 //  MARK: Generate RSS
 func generateRSS(template: String, output: String, posts: [Post]) {
@@ -251,7 +236,6 @@ func generateRSS(template: String, output: String, posts: [Post]) {
             
             var description = "\t<description><![CDATA[%@]]>\n</description>\n</item>\n"
             description = String(format: description, String(body))
-            //description = String(format: description, "test")
             
             let p = title + link + date + guid + description
             items.append(p)
@@ -272,10 +256,8 @@ func generateRSS(template: String, output: String, posts: [Post]) {
 }
 
 
-
-
 //  MARK: Write Post to Directory
-func writePostToDirectory(post: Post, outputDirectory: String, template: String) {s
+func writePostToDirectory(post: Post, outputDirectory: String, template: String) {
     // 1. Filename and directories
     let title = post.friendlyURL()
     let path = String(NSString(string:"\(template)/post.template").expandingTildeInPath)
@@ -288,12 +270,12 @@ func writePostToDirectory(post: Post, outputDirectory: String, template: String)
         let file = String(NSString(string:"\(outputDirectory)").expandingTildeInPath + "/\(title).html")
         do {
             try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
-            print ("Successfully wrote post to directory")
+            print ("Successfully wrote: \(title)")
         }
         catch {
             print ("unable to write post to directory")
         }
     } catch {
-        print ("unable to write post to directory: \(error)")
+        print ("\(error)")
     }
 }

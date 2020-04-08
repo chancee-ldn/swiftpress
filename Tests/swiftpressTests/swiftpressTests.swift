@@ -2,6 +2,8 @@ import XCTest
 import class Foundation.Bundle
 
 final class swiftpressTests: XCTestCase {
+    
+    /*
     func testExample() throws {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
@@ -28,7 +30,8 @@ final class swiftpressTests: XCTestCase {
 
         XCTAssertEqual(output, "Hello, world!\n")
     }
-
+     */
+    /*
     /// Returns path to the built products directory.
     var productsDirectory: URL {
       #if os(macOS)
@@ -42,6 +45,7 @@ final class swiftpressTests: XCTestCase {
     }
 
     static var allTests = [
-        ("testExample", testExample),
+        //("testExample", testExample),
     ]
+    */
 }

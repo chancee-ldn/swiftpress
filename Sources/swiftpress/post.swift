@@ -22,10 +22,16 @@ struct Post {
         return d!
     }
     
+    
     func friendlyURL() -> String {
         var c = title
         c = c.replacingOccurrences(of: ",", with: "")
-        c = c.replacingOccurrences(of: "&", with: "&amp")
+        c = c.replacingOccurrences(of: "&", with: "&")
+        c = c.replacingOccurrences(of: " ", with: "-")
+        c = c.replacingOccurrences(of: "!", with: "")
+        c = c.replacingOccurrences(of: ":", with: "")
+        
+        c = c.lowercased()
         return c
     }
 
