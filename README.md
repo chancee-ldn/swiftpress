@@ -1,11 +1,10 @@
 # swiftpress
 
-A simple static blogging system written in Swift. Inspired by @an0's Letterpress and the Markdown powered by [https://www.swiftbysundell.com](John Sundell's) Ink.
+A simple static blogging system written in Swift. Inspired by [@an0's](https://github.com/an0) Letterpress and the Markdown powered by [John Sundell's](https://www.swiftbysundell.com) Ink.
 
 
 ### Philospohy
-Blogging systems became too complicated, SQL shouldn't be needed to present a diary. There was a simpler age of CGI scripts, and batch processing. Swiftpress aims to restore the sanity of times past. A folder of markdown documents, a template, strike the match 🔥 . Get a folder of rendered HTML.
-
+The idea of using SQL for a diary seems wrong. Swiftpress is designed to produce a static blog by periodically processing a bunch of markdown files. I run it locally and use a cron to rsync to a sever.
 
 
 ### Usage
