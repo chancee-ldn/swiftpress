@@ -17,7 +17,6 @@ func makeDate(raw: String) -> Date {
 
 
 func makePost(data: String) -> Post {
-    
     let markdown: String = data
     let parser = MarkdownParser()
     let result = parser.parse(markdown)
@@ -34,45 +33,35 @@ func makePost(data: String) -> Post {
     return post
 }
 
-
-// Make a list of posts, grouped by month
-func writeArchiveList(postsPath: String, templatePath: String) {
+//  MARK: Archive list
+//  Make a list of posts, grouped by month
+func writeArchiveList(directory: String, templatePath: String) {
     let templatePath = String(NSString(string:"\(templatePath)").expandingTildeInPath) + "/\("archive.template")"
-    print (templatePath)
+    var archive = [Date : [Post]]()
     
-    let fileManager = FileManager.default
-    let location = String(NSString(string: "\(postsPath)").expandingTildeInPath)
+    print (Colours.CORAL + "\nWriting archive list" + Colours.base.rawValue)
+    print (Colours.PEACH + "Post directory: " + Colours.base.rawValue + directory)
+    print (Colours.PEACH + "Template directory: " + Colours.base.rawValue + templatePath)
+
+    let posts = returnAllPosts(directory: directory)
+    for post in posts {
+        // check if the month is empty, if not, append rather than add the post = generating groups
+        if archive[post.date] != nil {
+            var array = [Post]()
+            array.append(post)
+            archive[post.date] = array
+        } else {
+            archive[post.date] = [post]
+        }
+    }
     
     let dateFormatter = DateFormatter()
     dateFormatter.locale = Locale(identifier: "en_GB")
     dateFormatter.dateFormat = "MMM yyyy"
-    var posts = [Date : [Post]]()
     
-    if let e = fileManager.enumerator(atPath: location) {
-        for file in e {
-            let path = location + "/\(file)"
-            if let data = try? String(contentsOfFile: path, encoding: String.Encoding.utf8) {
-                // send the data off to a helper to turn into a post we can filter
-                let post = makePost(data: data)
-                
-                // check the date is empty, if not, append rather than add the post - generating groups
-                if posts[post.date] != nil {
-                    var array = [Post]()
-                    array.append(post)
-                    posts[post.date] = array
-                } else {
-                    posts[post.date] = [post]
-                }
-                print (post.date)
-            }
-        }
-    } else {
-        print ("unable to find posts directory")
-    }
-    
-    let recentPosts = Array(posts.sorted(by: { $0.0 < $1.0 }))[0...(posts.count) - 1]
+    let recentPosts = Array(archive.sorted(by: { $0.0 < $1.0 }))[0...(archive.count) - 1]
     let writingsGrouped = recentPosts.categorise { dateFormatter.string(from: $0.value[0].date) }
-    print (writingsGrouped.count)
+    print ("\(recentPosts.count) posts across \(writingsGrouped.count) groups \n")
     
     let monthGroups = writingsGrouped.sorted {
         guard let d1 = $0.key.shortDateUK, let d2 = $1.key.shortDateUK else { return false }
@@ -80,14 +69,15 @@ func writeArchiveList(postsPath: String, templatePath: String) {
     }
     
     for month in monthGroups {
-        print (Colours.blue + month.key + Colours.base.rawValue)
+        print (Colours.CORAL + month.key + Colours.base.rawValue)
         for item in month.value {
             for post in item.value {
                 print (post.title)
             }
         }
-        
     }
+    print ("\n")
+    
 }
 
 
@@ -131,6 +121,12 @@ func iteratePostDirectory(directory: String, outputDirectory: String, template: 
 func writeFrontPage(directory: String, outputDirectory: String, template: String, numberOfPosts: Int) {
     let posts = returnAllPosts(directory: directory)
     
+    print (Colours.CORAL + "\nWriting front page" + Colours.base.rawValue)
+    print (Colours.PEACH + "Post directory: " + Colours.base.rawValue + directory)
+    print (Colours.PEACH + "Template directory: " + Colours.base.rawValue + template)
+    print (Colours.PEACH + "Output directory: " + Colours.base.rawValue + template)
+    
+    
     //  1.  Group the posts
     var postDictionary = [Date: [Post]]()        // All the posts
     for post in posts {
@@ -142,10 +138,9 @@ func writeFrontPage(directory: String, outputDirectory: String, template: String
     }
     print (postDictionary.count)
     let frontPage = Array(postDictionary.sorted(by: { $0.0 > $1.0 }))[0...numberOfPosts]
-    for group in frontPage.reversed() {
-        print (group.key)
+    for group in frontPage {
         for post in group.value {
-            print (post.title)
+            print (post.title + " : " + post.date.description)
         }
     }
             
@@ -188,7 +183,7 @@ func writeFrontPage(directory: String, outputDirectory: String, template: String
         let file = String(NSString(string:"\(outputDirectory)").expandingTildeInPath + "/index.html")
         do {
             try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
-            print ("Successfully wrote front page to \(outputDirectory)")
+            print (Colours.CORAL + "Frontpage complete, written to: " + Colours.base.rawValue + outputDirectory + "\n")
         }
         catch {
             print ("unable to write post to directory")
@@ -202,7 +197,7 @@ func writeFrontPage(directory: String, outputDirectory: String, template: String
 
 //  MARK: Generate RSS
 func generateRSS(template: String, output: String, posts: [Post]) {
-    
+    print (Colours.CORAL + "Generating RSS" + Colours.base.rawValue)
     let path = String(NSString(string:"\(template)/rss.template").expandingTildeInPath)
     do {
         let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
@@ -245,7 +240,7 @@ func generateRSS(template: String, output: String, posts: [Post]) {
         let file = String(NSString(string:"\(output)").expandingTildeInPath + "/index.xml")
         do {
             try s.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
-            print ("Successfully wrote RSS to directory")
+            print (Colours.CORAL + "RSS written to output directory" + Colours.base.rawValue)
         }
         catch {
             print ("unable to write RSS to directory")

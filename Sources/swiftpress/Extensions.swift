@@ -48,6 +48,8 @@ func + (left: Colours, right: String) -> String {
     return left.rawValue + right
 }
 enum Colours: String {
+    case CORAL = "\u{001B}[38;5;211m"
+    case PEACH = "\u{001B}[38;5;217m"
     case black = "\u{001B}[0;30m"
     case red = "\u{001B}[0;31m"
     case green = "\u{001B}[0;32m"
@@ -60,6 +62,8 @@ enum Colours: String {
 
     func name() -> String {
         switch self {
+        case .CORAL: return "CORAL"
+        case .PEACH: return "PEACH"
         case .black: return "Black"
         case .red: return "Red"
         case .green: return "Green"
@@ -73,6 +77,6 @@ enum Colours: String {
     }
 
     static func all() -> [Colours] {
-        return [.black, .red, .green, .yellow, .blue, .magenta, .cyan, .white, .base]
+        return [.PEACH, .CORAL, .black, .red, .green, .yellow, .blue, .magenta, .cyan, .white, .base]
     }
 }

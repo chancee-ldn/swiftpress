@@ -17,16 +17,14 @@ public final class CommandLineTool {
         }
         
         if arguments[1] == "-archive" {
-            print ("Exporting archive list")
-            writeArchiveList(postsPath: arguments[2], templatePath: arguments[3])
-            
+            writeArchiveList(directory: arguments[2], templatePath: arguments[3])
         } else if arguments[1] == "-posts" {
-            print ("parsing a create posts argument")
             iteratePostDirectory(directory: arguments[2], outputDirectory: arguments[3], template: arguments[4])
             print("Wrote all posts")
         } else if arguments[1] == "-frontpage" {
-            print ("writing the front page")
             writeFrontPage(directory: arguments[2], outputDirectory: arguments[3], template: arguments[4], numberOfPosts: Int(arguments[5])!)
+        } else if arguments[1] == "-h" {
+            print ("Write some help text here")
         } else {
             print ("Unknown pipe: \n -posts ~/path/to/directoryOfPosts \n -archive ~/path/to/directoryOfPosts ~/path/to/outputDirectory \n  ")
         }
