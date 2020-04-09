@@ -20,14 +20,26 @@ That's it.
 This will generate a page of post titles, grouped by month.
 ```
 ./swiftpress -archive ~/draftsDirectory ~/templateDirectory
-./swiftpress -archive ~/Tests/drafts/ ~/Tests/templates
 ```
 
 ### Generate posts
 Generate posts and export them, looks for a file called `post.template` and injects content at first `%@`
-```./swiftpress -posts ~/draftsDirectory ~/outputDirectory ~/templateDirectory```
+```
+./swiftpress -posts ~/draftsDirectory ~/outputDirectory ~/templateDirectory
+```
 
 ### Write front page
 Makes a list of posts to stick on the front page
-```./swiftpress -frontpage ~/draftsDirectory ~/outputDirectory ~/templateDirectory```
+```
+./swiftpress -frontpage ~/draftsDirectory ~/outputDirectory ~/templateDirectory
+```
 
+## Test
+### Archive
+```
+./swiftpress -archive Tests/drafts Tests/templates
+```
+### Frontpage
+```
+./swiftpress -archive Tests/drafts Tests/templates
+```
