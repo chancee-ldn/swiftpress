@@ -256,6 +256,8 @@ func writePostToDirectory(post: Post, outputDirectory: String, template: String)
     // 1. Filename and directories
     let title = post.friendlyURL()
     let path = String(NSString(string:"\(template)/post.template").expandingTildeInPath)
+    print (path)
+    
     
     // 2. Make some content
     do {
@@ -263,6 +265,9 @@ func writePostToDirectory(post: Post, outputDirectory: String, template: String)
         let content = String(format: template, post.title, post.date.description, post.body)
 
         let file = String(NSString(string:"\(outputDirectory)").expandingTildeInPath + "/\(title).html")
+        
+        print ("writing post to: \(outputDirectory)")
+        print (file)
         do {
             try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
             print ("Successfully wrote: \(title)")

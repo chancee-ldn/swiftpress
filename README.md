@@ -12,6 +12,7 @@ The idea of using SQL for a diary seems wrong. Swiftpress is designed to produce
 ### Generate Archive
 This will generate a page of post titles, grouped by month.
 `./swiftpress -archive ~/draftsDirectory ~/templateDirectory`
+`./swiftpress -archive ~/Tests/drafts/ ~/Tests/templates`
 
 ### Generate posts
 Generate posts and export them, looks for a file called `post.template` and injects content at first `%@`

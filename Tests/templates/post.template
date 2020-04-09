@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Swiftpress blog</title>
+
+        <meta name="viewport" content="width=device-width, minimum-scale=1.0">
+        <meta name="description" content="">
+
+        <link rel="stylesheet" type="text/css" media="screen" href="../lib/style.css">
+        <link rel="alternate" type="application/rss+xml" title="Subscribe to What's New" href="feed.rss" />
+    </head>
+
+
+
+    <body>
+        <header>
+            <h1>Test</h1>
+        </header>
+       
+        <content>
+			<h1>%@</h1>
+			<h3>%@</h3>
+			%@
+        </content>
+
+        <footer>
+        </footer>
+
+    </body>
+
+    
+
+</html>

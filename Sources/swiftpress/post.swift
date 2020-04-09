@@ -30,6 +30,7 @@ struct Post {
         c = c.replacingOccurrences(of: " ", with: "-")
         c = c.replacingOccurrences(of: "!", with: "")
         c = c.replacingOccurrences(of: ":", with: "")
+        c = c.replacingOccurrences(of: "/", with: "-")
         
         c = c.lowercased()
         return c
