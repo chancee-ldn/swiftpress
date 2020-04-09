@@ -22,7 +22,7 @@ public final class CommandLineTool {
             iteratePostDirectory(directory: arguments[2], outputDirectory: arguments[3], template: arguments[4])
             print("Wrote all posts")
         } else if arguments[1] == "-frontpage" {
-            writeFrontPage(directory: arguments[2], outputDirectory: arguments[3], template: arguments[4], numberOfPosts: Int(arguments[5])!)
+            writeFrontPage(directory: arguments[2], outputDirectory: arguments[3], templatePath: arguments[4], numberOfPosts: Int(arguments[5])!)
         } else if arguments[1] == "-h" {
             print ("Write some help text here")
         } else {

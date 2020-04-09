@@ -118,13 +118,13 @@ func iteratePostDirectory(directory: String, outputDirectory: String, template: 
 
 //  MARK: Write front page
 //  outputs the most recent x number of posts to a front page
-func writeFrontPage(directory: String, outputDirectory: String, template: String, numberOfPosts: Int) {
+func writeFrontPage(directory: String, outputDirectory: String, templatePath: String, numberOfPosts: Int) {
     let posts = returnAllPosts(directory: directory)
     
     print (Colours.CORAL + "\nWriting front page" + Colours.base.rawValue)
     print (Colours.PEACH + "Post directory: " + Colours.base.rawValue + directory)
-    print (Colours.PEACH + "Template directory: " + Colours.base.rawValue + template)
-    print (Colours.PEACH + "Output directory: " + Colours.base.rawValue + template)
+    print (Colours.PEACH + "Template directory: " + Colours.base.rawValue + templatePath)
+    print (Colours.PEACH + "Output directory: " + Colours.base.rawValue + outputDirectory)
     
     
     //  1.  Group the posts
@@ -144,13 +144,11 @@ func writeFrontPage(directory: String, outputDirectory: String, template: String
         }
     }
             
-    generateRSS(template: template, output: outputDirectory, posts: posts)
-    
     // 2. Make some content
     do {
-        let path = String(NSString(string:"\(template)/index.html").expandingTildeInPath)
+        let path = String(NSString(string:"\(templatePath)/index.html").expandingTildeInPath)
         let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
-        
+                
         var c = ""
         for group in frontPage {
             
@@ -177,8 +175,7 @@ func writeFrontPage(directory: String, outputDirectory: String, template: String
                 
             }
         }
-        
-        
+                
         let content = String(format: template, c)
         let file = String(NSString(string:"\(outputDirectory)").expandingTildeInPath + "/index.html")
         do {
@@ -188,6 +185,8 @@ func writeFrontPage(directory: String, outputDirectory: String, template: String
         catch {
             print ("unable to write post to directory")
         }
+        //3. Turn the posts into an RSS feed
+        generateRSS(template: templatePath, output: outputDirectory, posts: posts)
     } catch {
         print ("\(error)")
     }
