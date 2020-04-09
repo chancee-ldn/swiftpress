@@ -8,7 +8,8 @@ Used to power my [blog](https://chanc.ee). I mostly made it because the idea of 
 
 
 ### Build
-`swift build`
+```swift build
+```
 
 That's it.
 
@@ -16,8 +17,10 @@ That's it.
 
 ### Generate Archive
 This will generate a page of post titles, grouped by month.
-```./swiftpress -archive ~/draftsDirectory ~/templateDirectory```
-```./swiftpress -archive ~/Tests/drafts/ ~/Tests/templates```
+```
+./swiftpress -archive ~/draftsDirectory ~/templateDirectory
+./swiftpress -archive ~/Tests/drafts/ ~/Tests/templates
+```
 
 ### Generate posts
 Generate posts and export them, looks for a file called `post.template` and injects content at first `%@`
