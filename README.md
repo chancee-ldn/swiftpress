@@ -11,10 +11,16 @@ Used to power my [blog](https://chanc.ee). I mostly made it because the idea of 
 ```
 swift build
 ```
-
 That's it.
 
 ## Usage
+
+### Auto generate
+Will look for `config.md` in it's local directory and execute `-frontpage`, `-archive` and `-posts`
+```
+./swiftpress -g
+```
+
 
 ### Generate Archive
 This will generate a page of post titles, grouped by month.

@@ -26,7 +26,14 @@ func generateConfig(data: String) {
     let parser = MarkdownParser()
     let result = parser.parse(markdown)
     
-    let c = Config(url: result.metadata["url"]!, outputDirectory: result.metadata["output"]!, templateDirectory: result.metadata["templates"]!, postsDirectory: result.metadata["posts"]!, frontpage: Int(result.metadata["frontpage"]!)!)
+    guard let url = result.metadata["url"] else { print ("Unable to find url in config"); return   }
+    guard let outputDirectory = result.metadata["output"] else { print ("Unable to find output directory in config"); return   }
+    guard let templateDirectory = result.metadata["templates"] else { print ("Unable to find a template directory in config"); return   }
+    guard let postsDirectory = result.metadata["posts"] else { print ("Unable to find a posts directory in config"); return   }
+    guard let postsOutputDirectory = result.metadata["postsOutput"] else { print ("Unable to find a posts directory in config"); return }
+    guard let frontpage = Int(result.metadata["frontpage"]!) else { print ("Unable to find a posts directory in config"); return }
+    
+    let c = Config(url: url, outputDirectory: outputDirectory, templateDirectory: templateDirectory, postsDirectory: postsDirectory, postsOutputDirectory: postsOutputDirectory, frontpage: frontpage)
     config = c
     print ("config set up with an \(config.frontpage) post frontpage")
 }
@@ -35,6 +42,7 @@ func customConfig(file: String) {
     do {
         let data = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
         generateConfig(data: data)
+        buildBlog()
     } catch {
         print (error)
     }
@@ -44,14 +52,22 @@ func generate() {
     do {
         let data = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
         generateConfig(data: data)
-        writeArchiveList()
-        iteratePostDirectory()
-        writeFrontPage()
+        buildBlog()
     } catch {
         print (error)
     }
 }
-
+func buildBlog() {
+    
+    print (Colours.CORAL + "\nAttempting build..." + Colours.base.rawValue)
+    print (Colours.PEACH + "Post directory: " + Colours.base.rawValue + config.postsDirectory)
+    print (Colours.PEACH + "Template directory: " + Colours.base.rawValue + config.templateDirectory)
+    print (Colours.PEACH + "Output directory: " + Colours.base.rawValue + config.outputDirectory)
+    
+    writeArchiveList()
+    iteratePostDirectory()
+    writeFrontPage()
+}
 
 //  MARK: Generate post
 func makePost(data: String) -> Post {
@@ -74,13 +90,10 @@ func makePost(data: String) -> Post {
 //  MARK: Archive list
 //  Make a list of posts, grouped by month
 func writeArchiveList() {
-    let templatePath = String(NSString(string: config.templateDirectory).expandingTildeInPath) + "/\("archive.template")"
-    var archive = [Date : [Post]]()
     
     print (Colours.CORAL + "\nWriting archive list" + Colours.base.rawValue)
-    print (Colours.PEACH + "Post directory: " + Colours.base.rawValue + config.postsDirectory)
-    print (Colours.PEACH + "Template directory: " + Colours.base.rawValue + templatePath)
-
+    var archive = [Date : [Post]]()
+    
     let posts = returnAllPosts(directory: config.postsDirectory)
     for post in posts {
         // check if the month is empty, if not, append rather than add the post = generating groups
@@ -114,8 +127,6 @@ func writeArchiveList() {
             }
         }
     }
-    print ("\n")
-    
 }
 
 
@@ -159,12 +170,6 @@ func iteratePostDirectory() {
 func writeFrontPage() {
     let posts = returnAllPosts(directory: config.postsDirectory)
     
-    print (Colours.CORAL + "\nWriting front page" + Colours.base.rawValue)
-    print (Colours.PEACH + "Post directory: " + Colours.base.rawValue + config.postsDirectory)
-    print (Colours.PEACH + "Template directory: " + Colours.base.rawValue + config.templateDirectory)
-    print (Colours.PEACH + "Output directory: " + Colours.base.rawValue + config.outputDirectory)
-    
-    
     //  1.  Group the posts
     var postDictionary = [Date: [Post]]()        // All the posts
     for post in posts {
@@ -174,13 +179,11 @@ func writeFrontPage() {
             postDictionary[post.date]?.append(post)
         }
     }
-    print (postDictionary.count)
     let frontPage = Array(postDictionary.sorted(by: { $0.0 > $1.0 }))[0...config.frontpage]
     var rssPosts = [Post]()     // so we match the number of posts of the frontpage without tracking any variables
     for group in frontPage {
         for post in group.value {
             rssPosts.append(post)
-            print (post.title + " : " + post.date.description)
         }
     }
             
@@ -300,15 +303,17 @@ func writePostToDirectory(post: Post) {
     do {
         let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
         let content = String(format: template, post.title, post.date.description, post.body)
-        let file = String(NSString(string:"\(config.outputDirectory)").expandingTildeInPath + "/\(title).html")
+        let file = String(NSString(string:"\(config.postsOutputDirectory)").expandingTildeInPath + "/\(title).html")
         do {
             try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
-            print ("Successfully wrote: \(file)")
+            print (Colours.PASS + "• " + Colours.base.rawValue + "\(file)")
         }
         catch {
-            print ("unable to write post to directory")
+            print (Colours.ERROR + "• " + Colours.base.rawValue + "unable to write \(file) to directory")
+            print (error)
         }
     } catch {
+        print (Colours.ERROR + "• " + Colours.base.rawValue + "unable to access \(path)")
         print ("\(error)")
     }
 }

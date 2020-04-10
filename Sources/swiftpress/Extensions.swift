@@ -50,13 +50,8 @@ func + (left: Colours, right: String) -> String {
 enum Colours: String {
     case CORAL = "\u{001B}[38;5;211m"
     case PEACH = "\u{001B}[38;5;217m"
-    case black = "\u{001B}[0;30m"
-    case red = "\u{001B}[0;31m"
-    case green = "\u{001B}[0;32m"
-    case yellow = "\u{001B}[0;33m"
-    case blue = "\u{001B}[0;34m"
-    case magenta = "\u{001B}[0;35m"
-    case cyan = "\u{001B}[0;36m"
+    case ERROR = "\u{001B}[38;5;196m"
+    case PASS = "\u{001B}[38;5;46m"
     case white = "\u{001B}[0;37m"
     case base = "\u{001B}[0;0m"
 
@@ -64,19 +59,14 @@ enum Colours: String {
         switch self {
         case .CORAL: return "CORAL"
         case .PEACH: return "PEACH"
-        case .black: return "Black"
-        case .red: return "Red"
-        case .green: return "Green"
-        case .yellow: return "Yellow"
-        case .blue: return "Blue"
-        case .magenta: return "Magenta"
-        case .cyan: return "Cyan"
+        case .ERROR: return "ERROR"
+        case .PASS: return "PASS"
         case .white: return "White"
         case .base: return "Base"
         }
     }
 
     static func all() -> [Colours] {
-        return [.PEACH, .CORAL, .black, .red, .green, .yellow, .blue, .magenta, .cyan, .white, .base]
+        return [.PEACH, .CORAL, .ERROR, .PASS, .white, .base]
     }
 }

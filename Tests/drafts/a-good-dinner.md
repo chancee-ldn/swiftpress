@@ -1,5 +1,5 @@
 ---
-title: Thursday 1 Feb 1665/1666 
+title: There very merry, and a good dinner 
 date: 01 Feb 1665 16:58:24 +0000 
 excerpt: 
 tags: London, Exchange
