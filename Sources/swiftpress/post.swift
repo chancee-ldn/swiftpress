@@ -15,6 +15,7 @@ struct Config {
     var outputDirectory: String = ""
     var templateDirectory: String = ""
     var postsDirectory: String = ""
+    var frontpage: Int = 1
 }
 
 

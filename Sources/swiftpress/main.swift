@@ -20,17 +20,18 @@ public final class CommandLineTool {
         
         if arguments[1] == "-archive" {
             //writeArchiveList(directory: arguments[2], templatePath: arguments[3])
+        } else if arguments[1] == "-c" {
+            customConfig(file: arguments[2])
         } else if arguments[1] == "-posts" {
-            iteratePostDirectory(directory: arguments[2], outputDirectory: arguments[3], template: arguments[4])
+            iteratePostDirectory()
             print("Wrote all posts")
         } else if arguments[1] == "-frontpage" {
-            writeFrontPage(directory: arguments[2], outputDirectory: arguments[3], templatePath: arguments[4], numberOfPosts: Int(arguments[5])!)
+            //writeFrontPage(directory: arguments[2], outputDirectory: arguments[3], templatePath: arguments[4], numberOfPosts: Int(arguments[5])!)
         } else if arguments[1] == "-h" {
             print ("Write some help text here")
         } else if arguments[1] == "-g" {
             print ("Auto generate")
             generate()
-            writeArchiveList()
         } else {
             print ("Unknown pipe: \n -posts ~/path/to/directoryOfPosts \n -archive ~/path/to/directoryOfPosts ~/path/to/outputDirectory \n  ")
         }

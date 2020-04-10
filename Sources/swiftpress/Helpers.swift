@@ -18,29 +18,42 @@ func makeDate(raw: String) -> Date {
     return date!
 }
 
+
+
+//  MARK: Config
+func generateConfig(data: String) {
+    let markdown: String = data
+    let parser = MarkdownParser()
+    let result = parser.parse(markdown)
+    
+    let c = Config(url: result.metadata["url"]!, outputDirectory: result.metadata["output"]!, templateDirectory: result.metadata["templates"]!, postsDirectory: result.metadata["posts"]!, frontpage: Int(result.metadata["frontpage"]!)!)
+    config = c
+    print ("config set up with an \(config.frontpage) post frontpage")
+}
+func customConfig(file: String) {
+    let path = String(NSString(string: file).expandingTildeInPath)
+    do {
+        let data = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
+        generateConfig(data: data)
+    } catch {
+        print (error)
+    }
+}
 func generate() {
     let path = String(NSString(string:"").expandingTildeInPath) + "\("config.md")"
     do {
         let data = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
-        print (path, data)
-        
-        let markdown: String = data
-        let parser = MarkdownParser()
-        let result = parser.parse(markdown)
-        
-        
-        let c = Config(url: result.metadata["url"]!, outputDirectory: result.metadata["output"]!, templateDirectory: result.metadata["templates"]!, postsDirectory: result.metadata["posts"]!)
-        print (c)
-        config = c
-        print (c, config)
-        
-        
+        generateConfig(data: data)
+        writeArchiveList()
+        iteratePostDirectory()
+        writeFrontPage()
     } catch {
         print (error)
     }
 }
 
 
+//  MARK: Generate post
 func makePost(data: String) -> Post {
     let markdown: String = data
     let parser = MarkdownParser()
@@ -130,26 +143,26 @@ func returnAllPosts(directory: String) -> [Post] {
 
 //  MARK: Iterate directory
 //  Goes through the specificed directory and outputs HTML via post.template
-func iteratePostDirectory(directory: String, outputDirectory: String, template: String) {
-    let posts = returnAllPosts(directory: directory)
+func iteratePostDirectory() {
+    let posts = returnAllPosts(directory: config.postsDirectory)
     print (Colours.CORAL + "\nWriting all posts" + Colours.base.rawValue)
     for post in posts {
-        writePostToDirectory(post: post, outputDirectory: outputDirectory, template: template)
+        writePostToDirectory(post: post)
     }
-    print (Colours.CORAL + "Output \(posts.count) posts to: " + Colours.base.rawValue + outputDirectory + "\n")
+    print (Colours.CORAL + "Output \(posts.count) posts to: " + Colours.base.rawValue + config.outputDirectory + "\n")
 }
 
 
 
 //  MARK: Write front page
-//  outputs the most recent x number of posts to a front page
-func writeFrontPage(directory: String, outputDirectory: String, templatePath: String, numberOfPosts: Int) {
-    let posts = returnAllPosts(directory: directory)
+//  outputs the most recent config.frontpage of posts to a front page
+func writeFrontPage() {
+    let posts = returnAllPosts(directory: config.postsDirectory)
     
     print (Colours.CORAL + "\nWriting front page" + Colours.base.rawValue)
-    print (Colours.PEACH + "Post directory: " + Colours.base.rawValue + directory)
-    print (Colours.PEACH + "Template directory: " + Colours.base.rawValue + templatePath)
-    print (Colours.PEACH + "Output directory: " + Colours.base.rawValue + outputDirectory)
+    print (Colours.PEACH + "Post directory: " + Colours.base.rawValue + config.postsDirectory)
+    print (Colours.PEACH + "Template directory: " + Colours.base.rawValue + config.templateDirectory)
+    print (Colours.PEACH + "Output directory: " + Colours.base.rawValue + config.outputDirectory)
     
     
     //  1.  Group the posts
@@ -162,7 +175,7 @@ func writeFrontPage(directory: String, outputDirectory: String, templatePath: St
         }
     }
     print (postDictionary.count)
-    let frontPage = Array(postDictionary.sorted(by: { $0.0 > $1.0 }))[0...numberOfPosts]
+    let frontPage = Array(postDictionary.sorted(by: { $0.0 > $1.0 }))[0...config.frontpage]
     var rssPosts = [Post]()     // so we match the number of posts of the frontpage without tracking any variables
     for group in frontPage {
         for post in group.value {
@@ -173,7 +186,7 @@ func writeFrontPage(directory: String, outputDirectory: String, templatePath: St
             
     // 2. Make some content
     do {
-        let path = String(NSString(string:"\(templatePath)/index.html").expandingTildeInPath)
+        let path = String(NSString(string:"\(config.templateDirectory)/index.html").expandingTildeInPath)
         let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
                 
         var c = ""
@@ -204,16 +217,16 @@ func writeFrontPage(directory: String, outputDirectory: String, templatePath: St
         }
                 
         let content = String(format: template, c)
-        let file = String(NSString(string:"\(outputDirectory)").expandingTildeInPath + "/index.html")
+        let file = String(NSString(string:"\(config.outputDirectory)").expandingTildeInPath + "/index.html")
         do {
             try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
-            print (Colours.CORAL + "Frontpage complete, written to: " + Colours.base.rawValue + outputDirectory + "\n")
+            print (Colours.CORAL + "Frontpage complete, written to: " + Colours.base.rawValue + "\n")
         }
         catch {
             print ("unable to write post to directory")
         }
         //3. Turn the posts into an RSS feed
-        generateRSS(template: templatePath, output: outputDirectory, posts: rssPosts)
+        generateRSS(posts: rssPosts)
     } catch {
         print ("\(error)")
     }
@@ -222,9 +235,9 @@ func writeFrontPage(directory: String, outputDirectory: String, templatePath: St
 
 
 //  MARK: Generate RSS
-func generateRSS(template: String, output: String, posts: [Post]) {
+func generateRSS(posts: [Post]) {
     print (Colours.CORAL + "Generating RSS" + Colours.base.rawValue)
-    let path = String(NSString(string:"\(template)/rss.template").expandingTildeInPath)
+    let path = String(NSString(string:"\(config.templateDirectory)/rss.template").expandingTildeInPath)
     do {
         let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
         let currentDateTime = Date()
@@ -263,7 +276,7 @@ func generateRSS(template: String, output: String, posts: [Post]) {
         }
         
         let s = String(format: template, currentDateTime.description,  items)
-        let file = String(NSString(string:"\(output)").expandingTildeInPath + "/index.xml")
+        let file = String(NSString(string:"\(config.outputDirectory)").expandingTildeInPath + "/index.xml")
         do {
             try s.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
             print (Colours.CORAL + "RSS written to output directory" + Colours.base.rawValue)
@@ -278,16 +291,16 @@ func generateRSS(template: String, output: String, posts: [Post]) {
 
 
 //  MARK: Write Post to Directory
-func writePostToDirectory(post: Post, outputDirectory: String, template: String) {
+func writePostToDirectory(post: Post) {
     // 1. Filename and directories
     let title = post.guid()
-    let path = String(NSString(string:"\(template)/post.template").expandingTildeInPath)
+    let path = String(NSString(string:"\(config.templateDirectory)/post.template").expandingTildeInPath)
         
     // 2. Make some content
     do {
         let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
         let content = String(format: template, post.title, post.date.description, post.body)
-        let file = String(NSString(string:"\(outputDirectory)").expandingTildeInPath + "/\(title).html")
+        let file = String(NSString(string:"\(config.outputDirectory)").expandingTildeInPath + "/\(title).html")
         do {
             try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
             print ("Successfully wrote: \(file)")
