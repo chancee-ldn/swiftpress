@@ -11,7 +11,7 @@ Used to power my [blog](https://chanc.ee). I mostly made it because the idea of 
 ```
 swift build
 ```
-That's it.
+That's it. I've supplied a enough content in the Tests to export a blog with two posts from Mr Samuel Pepes - hopefully this is enough to let you see the inner workings.
 
 ## Usage
 
