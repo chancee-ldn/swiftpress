@@ -23,6 +23,20 @@ postsOutput: /your/directory/for/posts
 frontpage: 7
 ```
 
+### A post
+Needs to be formatted like so:
+```
+---
+title: Tt is a play of itself the worst that ever I heard in my life
+date: 01 Mar 1661 16:58:24 +0000 
+excerpt: A short extract that will be included in the RSS feed...
+tags: Tags, Seperated By, Commas
+lang: English       
+link: if a link it provided, the title on the frontpage will point to it, if blank it will push to the post
+---
+a posts content...(in markdown format)
+```
+
 ### Auto generate
 Will look for `config.md` in it's local directory and execute `-frontpage`, `-archive` and `-posts`
 ```
@@ -30,7 +44,7 @@ Will look for `config.md` in it's local directory and execute `-frontpage`, `-ar
 ```
 
 ### Custom config
-Define an ad-hoc  `config.md` and execute `-frontpage`, `-archive` and `-posts`. This way you can use a single install of swiftpress to run multiple blogs.
+Define an ad-hoc  `config.md` and execute `-frontpage`, `-archive` and `-posts`. This way you can use a single install of swiftpress to press multiple blogs.
 ```
 ./swiftpress -c custom-config.md
 ```
@@ -56,4 +70,4 @@ Makes a list of posts to stick on the front page
 
 ## Notes
 
-The default is to export sensible European dates `(dd MM yyyy)`.  You can override this be writing a custom date function in the `Post` struct.
+The default is to export sensible European dates `(dd MM yyyy)`.  You can override this by writing a custom date function in the `Post` struct.
