@@ -33,7 +33,7 @@ Will look for `config.md` in it's local directory and execute `-frontpage`, `-ar
 ```
 
 ### Custom config
-Define a custom config file `config.md` in it's local directory and execute `-frontpage`, `-archive` and `-posts`
+Define an ad-hoc  `config.md` and execute `-frontpage`, `-archive` and `-posts`. This way you can use a single install of swiftpress to run multiple blogs.
 ```
 ./swiftpress -c custom-config.md
 ```
