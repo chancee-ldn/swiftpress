@@ -8,7 +8,7 @@
 import Foundation
 
 
-var configPresent = false
+var configSet = false
 var config = Config()
 
 func makeDate(raw: String) -> Date {
@@ -42,17 +42,29 @@ func customConfig(file: String) {
     do {
         let data = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
         generateConfig(data: data)
+        configSet = true
         buildBlog()
     } catch {
         print (error)
     }
 }
-func generate() {
+func autoConfig() {
     let path = String(NSString(string:"").expandingTildeInPath) + "\("config.md")"
     do {
         let data = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
         generateConfig(data: data)
+        configSet = true
         buildBlog()
+    } catch {
+        print (error)
+    }
+}
+func noConfig() {
+    let path = String(NSString(string:"").expandingTildeInPath) + "\("config.md")"
+    do {
+        let data = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
+        generateConfig(data: data)
+        configSet = true
     } catch {
         print (error)
     }
@@ -168,6 +180,12 @@ func iteratePostDirectory() {
 //  MARK: Write front page
 //  outputs the most recent config.frontpage of posts to a front page
 func writeFrontPage() {
+    
+    if configSet == false {
+        noConfig()
+        configSet = true
+    }
+    
     let posts = returnAllPosts(directory: config.postsDirectory)
     
     //  1.  Group the posts

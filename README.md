@@ -15,37 +15,44 @@ That's it.
 
 ## Usage
 
+### Config file
+We need a number of items to produce a blog:
+```
+url: https://domain.com
+output: /your/output/directory
+templates: /your/templates/directory
+posts: /your/markdown/posts/directory
+postsOutput: /your/directory/for/posts
+frontpage: 7
+```
+
 ### Auto generate
 Will look for `config.md` in it's local directory and execute `-frontpage`, `-archive` and `-posts`
 ```
 ./swiftpress -g
 ```
 
+### Custom config
+Define a custom config file `config.md` in it's local directory and execute `-frontpage`, `-archive` and `-posts`
+```
+./swiftpress -c custom-config.md
+```
+
 
 ### Generate Archive
 This will generate a page of post titles, grouped by month.
 ```
-./swiftpress -archive ~/draftsDirectory ~/templateDirectory
+./swiftpress -archive
 ```
 
 ### Generate posts
 Generate posts and export them, looks for a file called `post.template` and injects content at first `%@`
 ```
-./swiftpress -posts ~/draftsDirectory ~/outputDirectory ~/templateDirectory
+./swiftpress -posts
 ```
 
 ### Write front page
 Makes a list of posts to stick on the front page
 ```
-./swiftpress -frontpage ~/draftsDirectory ~/outputDirectory ~/templateDirectory
-```
-
-## Test
-### Archive
-```
-./swiftpress -archive Tests/drafts Tests/templates
-```
-### Frontpage
-```
-./swiftpress -frontpage Tests/drafts Tests/templates 3
+./swiftpress -frontpage
 ```
