@@ -56,3 +56,7 @@ Makes a list of posts to stick on the front page
 ```
 ./swiftpress -frontpage
 ```
+
+## Notes
+
+The default is to export sensible European dates `(dd MM yyyy)`.  You can override this be writing a custom date function in the `Post` struct.
