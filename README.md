@@ -41,5 +41,5 @@ Makes a list of posts to stick on the front page
 ```
 ### Frontpage
 ```
-./swiftpress -archive Tests/drafts Tests/templates
+./swiftpress -frontpage Tests/drafts Tests/templates 3
 ```

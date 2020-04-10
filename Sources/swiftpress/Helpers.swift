@@ -8,11 +8,36 @@
 import Foundation
 
 
+var configPresent = false
+var config = Config()
+
 func makeDate(raw: String) -> Date {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "dd MMM yyyy HH:mm:ss z"
     let date = dateFormatter.date(from: raw)
     return date!
+}
+
+func generate() {
+    let path = String(NSString(string:"").expandingTildeInPath) + "\("config.md")"
+    do {
+        let data = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
+        print (path, data)
+        
+        let markdown: String = data
+        let parser = MarkdownParser()
+        let result = parser.parse(markdown)
+        
+        
+        let c = Config(url: result.metadata["url"]!, outputDirectory: result.metadata["output"]!, templateDirectory: result.metadata["templates"]!, postsDirectory: result.metadata["posts"]!)
+        print (c)
+        config = c
+        print (c, config)
+        
+        
+    } catch {
+        print (error)
+    }
 }
 
 
@@ -22,7 +47,7 @@ func makePost(data: String) -> Post {
     let result = parser.parse(markdown)
 
     let title = result.metadata["title"]!
-    let date = makeDate(raw: result.metadata["date"]!)  // NOTE make this a try/catch for a malformed date
+    let date = makeDate(raw: result.metadata["date"]!)  // NOTE make this a try/catch for a malformed date, if nil, inject current date
     var link = ""
     if result.metadata["link"] != nil {
         link = result.metadata["link"]!
@@ -35,15 +60,15 @@ func makePost(data: String) -> Post {
 
 //  MARK: Archive list
 //  Make a list of posts, grouped by month
-func writeArchiveList(directory: String, templatePath: String) {
-    let templatePath = String(NSString(string:"\(templatePath)").expandingTildeInPath) + "/\("archive.template")"
+func writeArchiveList() {
+    let templatePath = String(NSString(string: config.templateDirectory).expandingTildeInPath) + "/\("archive.template")"
     var archive = [Date : [Post]]()
     
     print (Colours.CORAL + "\nWriting archive list" + Colours.base.rawValue)
-    print (Colours.PEACH + "Post directory: " + Colours.base.rawValue + directory)
+    print (Colours.PEACH + "Post directory: " + Colours.base.rawValue + config.postsDirectory)
     print (Colours.PEACH + "Template directory: " + Colours.base.rawValue + templatePath)
 
-    let posts = returnAllPosts(directory: directory)
+    let posts = returnAllPosts(directory: config.postsDirectory)
     for post in posts {
         // check if the month is empty, if not, append rather than add the post = generating groups
         if archive[post.date] != nil {
@@ -107,11 +132,11 @@ func returnAllPosts(directory: String) -> [Post] {
 //  Goes through the specificed directory and outputs HTML via post.template
 func iteratePostDirectory(directory: String, outputDirectory: String, template: String) {
     let posts = returnAllPosts(directory: directory)
-    print ("reading \(posts.count) posts from: \(directory)")
+    print (Colours.CORAL + "\nWriting all posts" + Colours.base.rawValue)
     for post in posts {
         writePostToDirectory(post: post, outputDirectory: outputDirectory, template: template)
     }
-    print ("wrote \(posts.count) posts")
+    print (Colours.CORAL + "Output \(posts.count) posts to: " + Colours.base.rawValue + outputDirectory + "\n")
 }
 
 
@@ -138,8 +163,10 @@ func writeFrontPage(directory: String, outputDirectory: String, templatePath: St
     }
     print (postDictionary.count)
     let frontPage = Array(postDictionary.sorted(by: { $0.0 > $1.0 }))[0...numberOfPosts]
+    var rssPosts = [Post]()     // so we match the number of posts of the frontpage without tracking any variables
     for group in frontPage {
         for post in group.value {
+            rssPosts.append(post)
             print (post.title + " : " + post.date.description)
         }
     }
@@ -186,7 +213,7 @@ func writeFrontPage(directory: String, outputDirectory: String, templatePath: St
             print ("unable to write post to directory")
         }
         //3. Turn the posts into an RSS feed
-        generateRSS(template: templatePath, output: outputDirectory, posts: posts)
+        generateRSS(template: templatePath, output: outputDirectory, posts: rssPosts)
     } catch {
         print ("\(error)")
     }
@@ -206,16 +233,16 @@ func generateRSS(template: String, output: String, posts: [Post]) {
         for post in posts {
             
             var title = "<item>\n\t<title>%@</title>\n"
-            title = String(format: title, post.title)
-            title = title.replacingOccurrences(of: "&", with: "&amp;")
-            
-            
+            title = String(format: title, post.friendlyURL())
+                        
             var link = "\t<link>%@</link>\n"
             link = String(format: link, post.link)
             
             var date = "\t<pubDate>%@</pubDate>\n"
             date = String(format: date, post.date.description)
-            let guid = ""
+            
+            var guid = "\t<guid>%@</guid>\n"
+            guid = String(format: guid, post.guid())
             
             var parser = MarkdownParser()
             let modifier = Modifier(target: .links) { html, markdown in
@@ -253,23 +280,17 @@ func generateRSS(template: String, output: String, posts: [Post]) {
 //  MARK: Write Post to Directory
 func writePostToDirectory(post: Post, outputDirectory: String, template: String) {
     // 1. Filename and directories
-    let title = post.friendlyURL()
+    let title = post.guid()
     let path = String(NSString(string:"\(template)/post.template").expandingTildeInPath)
-    print (path)
-    
-    
+        
     // 2. Make some content
     do {
         let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
         let content = String(format: template, post.title, post.date.description, post.body)
-
         let file = String(NSString(string:"\(outputDirectory)").expandingTildeInPath + "/\(title).html")
-        
-        print ("writing post to: \(outputDirectory)")
-        print (file)
         do {
             try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
-            print ("Successfully wrote: \(title)")
+            print ("Successfully wrote: \(file)")
         }
         catch {
             print ("unable to write post to directory")

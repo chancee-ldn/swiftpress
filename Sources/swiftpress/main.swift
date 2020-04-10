@@ -10,14 +10,16 @@ public final class CommandLineTool {
         self.arguments = arguments
     }
 
-
+    var config = Config()
+    var configPresent = false
+    
     public func run() throws {
         guard arguments.count > 1 else {
             throw Error.missingFileName
         }
         
         if arguments[1] == "-archive" {
-            writeArchiveList(directory: arguments[2], templatePath: arguments[3])
+            //writeArchiveList(directory: arguments[2], templatePath: arguments[3])
         } else if arguments[1] == "-posts" {
             iteratePostDirectory(directory: arguments[2], outputDirectory: arguments[3], template: arguments[4])
             print("Wrote all posts")
@@ -25,6 +27,10 @@ public final class CommandLineTool {
             writeFrontPage(directory: arguments[2], outputDirectory: arguments[3], templatePath: arguments[4], numberOfPosts: Int(arguments[5])!)
         } else if arguments[1] == "-h" {
             print ("Write some help text here")
+        } else if arguments[1] == "-g" {
+            print ("Auto generate")
+            generate()
+            writeArchiveList()
         } else {
             print ("Unknown pipe: \n -posts ~/path/to/directoryOfPosts \n -archive ~/path/to/directoryOfPosts ~/path/to/outputDirectory \n  ")
         }

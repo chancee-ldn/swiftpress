@@ -8,6 +8,16 @@
 import Foundation
 //import Ink
 
+
+
+struct Config {
+    var url: String = ""
+    var outputDirectory: String = ""
+    var templateDirectory: String = ""
+    var postsDirectory: String = ""
+}
+
+
 struct Post {    
     var title: String
     var date: Date
@@ -21,6 +31,15 @@ struct Post {
         let d = dateFormatter.date(from: date.description)
         return d!
     }
+    
+    
+    func guid() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "ddMMyyyy"
+        let guid = dateFormatter.string(from: date) + "-" + friendlyURL()
+        return guid
+    }
+    
     
     
     func friendlyURL() -> String {
