@@ -16,7 +16,7 @@ That's it.
 ## Usage
 
 ### Config file
-We need a number of items to produce a blog:
+We need a number of items to produce a blog. Place them in a markdown formatted like the below. Swiftpress will look in it's local directory for `config.md` or you can supply an ad hoc version via `-c` flag. The `url` value is only used in the RSS injection method current, `frontpage` dictates the number of posts to show on the front page.
 ```
 url: https://domain.com
 output: /your/output/directory
