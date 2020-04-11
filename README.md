@@ -13,7 +13,7 @@ That's it. I've supplied a enough content in the Tests to export a blog with two
 ## Usage
 
 ### Config file
-We need a number of items to produce a blog. Place them in a markdown formatted like the below. Swiftpress will look in it's local directory for `config.md` or you can supply an ad hoc version via `-c` flag. The `url` value is only used in the RSS injection method current, `frontpage` dictates the number of posts to show on the front page.
+We need a number of items to produce a blog. Place them in a markdown formatted like the below. Swiftpress will look in it's local directory for `config.md` or you can supply an ad hoc version via `-c` flag. The `url` value is only used in the RSS injection method currently, `frontpage` dictates the number of posts to show on the front page.
 ```
 url: https://domain.com
 output: /your/output/directory
@@ -27,12 +27,12 @@ frontpage: 7
 Needs to be formatted like so:
 ```
 ---
-title: Tt is a play of itself the worst that ever I heard in my life
+title: It is a play of itself the worst that ever I heard in my life
 date: 01 Mar 1661 16:58:24 +0000 
 excerpt: A short extract that will be included in the RSS feed...
 tags: Tags, Seperated By, Commas
 lang: English       
-link: if a link it provided, the title on the frontpage will point to it, if blank it will push to the post
+link: if a link is provided, the title on the frontpage will point to it, if blank it will push to the post
 ---
 a posts content...(in markdown format)
 ```
