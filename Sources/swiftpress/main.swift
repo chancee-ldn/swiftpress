@@ -14,9 +14,13 @@ public final class CommandLineTool {
     var configPresent = false
     
     public func run() throws {
+        
         guard arguments.count > 1 else {
-            throw Error.missingFileName
+            //bakedConfig()
+            return
+            //throw Error.missingFileName
         }
+        
         // multiple argument example
         //writeArchiveList(directory: arguments[2], templatePath: arguments[3])
         if arguments[1] == "-archive" {
@@ -33,7 +37,8 @@ public final class CommandLineTool {
             print ("Auto generate")
             autoConfig()
         } else {
-            print ("Unknown pipe: \n -c \n -g \n -posts  \n -archive  \n  ")
+            autoConfig()
+            //print ("Unknown pipe: \n -c \n -g \n -posts  \n -archive  \n  ")
         }
     }
 }

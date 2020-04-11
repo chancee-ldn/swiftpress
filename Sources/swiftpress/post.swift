@@ -27,11 +27,13 @@ struct Post {
     var body: String
     
     
-    func ukDate() -> Date {
+    func ukDate() -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd MMM yyyy HH:mm:ss z"
-        let d = dateFormatter.date(from: date.description)
-        return d!
+        dateFormatter.locale = Locale(identifier: "en_GB")
+        dateFormatter.dateFormat = "dd MMM yyyy"
+        
+        let d = dateFormatter.string(from: date)
+        return d
     }
     
     
@@ -47,7 +49,7 @@ struct Post {
     func friendlyURL() -> String {
         var c = title
         c = c.replacingOccurrences(of: ",", with: "")
-        c = c.replacingOccurrences(of: "&", with: "&")
+        c = c.replacingOccurrences(of: "&", with: "")
         c = c.replacingOccurrences(of: " ", with: "-")
         c = c.replacingOccurrences(of: "!", with: "")
         c = c.replacingOccurrences(of: ":", with: "")

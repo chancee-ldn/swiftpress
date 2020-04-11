@@ -48,6 +48,7 @@ func customConfig(file: String) {
         print (error)
     }
 }
+
 func autoConfig() {
     let path = String(NSString(string:"").expandingTildeInPath) + "\("config.md")"
     do {
@@ -226,7 +227,7 @@ func writeFrontPage() {
             for post in group.value {
                 
                 if post.link == "" {
-                    let headline = "<h2><a href=\"posts/\(post.friendlyURL()).html\">\(post.title)</a></h2>"
+                    let headline = "<h2><a href=\"posts/\(post.guid()).html\">\(post.title)</a></h2>"
                     c.append(headline)
                 } else {
                     let headline = "<h2><a href=\"\(post.link)\">\(post.title)</a></h2>"
@@ -320,7 +321,7 @@ func writePostToDirectory(post: Post) {
     // 2. Make some content
     do {
         let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
-        let content = String(format: template, post.title, post.date.description, post.body)
+        let content = String(format: template, post.ukDate(), post.title, post.body)
         let file = String(NSString(string:"\(config.postsOutputDirectory)").expandingTildeInPath + "/\(title).html")
         do {
             try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
