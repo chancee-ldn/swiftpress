@@ -71,3 +71,8 @@ Makes a list of posts to stick on the front page
 ## Notes
 
 The default is to export sensible European dates `(dd MM yyyy)`.  You can override this by writing a custom date function in the `Post` struct.
+
+
+## License
+
+Swiftpress is licensed under a BSD-3-clause license. See LICENSE for details.
