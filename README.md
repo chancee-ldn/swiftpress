@@ -75,4 +75,4 @@ The default is to export sensible European dates `(dd MM yyyy)`.  You can overri
 
 ## License
 
-Swiftpress is licensed under a BSD-3-clause license. See LICENSE for details.
+Swiftpress is licensed under a BSD-3-clause license. See [LICENSE](LICENSE) for details.
