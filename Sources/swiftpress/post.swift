@@ -56,6 +56,7 @@ struct Post {
         return c
     }
     
+    // strips everything to be a safe filename, lowercases, to be friendly
     func cleanTitle() -> String {
         var c = title
         c = c.replacingOccurrences(of: ",", with: "")

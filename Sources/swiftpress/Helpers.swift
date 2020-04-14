@@ -20,7 +20,7 @@ func makeDate(raw: String) -> Date {
 
 
 
-//  MARK: Config
+//  MARK: Generate Config
 func generateConfig(data: String) {
     let markdown: String = data
     let parser = MarkdownParser()
@@ -37,6 +37,9 @@ func generateConfig(data: String) {
     config = c
     print ("config set up with an \(config.frontpage) post frontpage")
 }
+
+
+// MARK:    Custom config file
 func customConfig(file: String) {
     let path = String(NSString(string: file).expandingTildeInPath)
     do {
@@ -49,27 +52,8 @@ func customConfig(file: String) {
     }
 }
 
-func autoConfig() {
-    let path = String(NSString(string:"").expandingTildeInPath) + "\("config.md")"
-    do {
-        let data = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
-        generateConfig(data: data)
-        configSet = true
-        buildBlog()
-    } catch {
-        print (error)
-    }
-}
-func noConfig() {
-    let path = String(NSString(string:"").expandingTildeInPath) + "\("config.md")"
-    do {
-        let data = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
-        generateConfig(data: data)
-        configSet = true
-    } catch {
-        print (error)
-    }
-}
+
+
 func buildBlog() {
     
     print (Colours.CORAL + "\nAttempting build..." + Colours.base.rawValue)
@@ -181,12 +165,7 @@ func iteratePostDirectory() {
 //  MARK: Write front page
 //  outputs the most recent config.frontpage of posts to a front page
 func writeFrontPage() {
-    
-    if configSet == false {
-        noConfig()
-        configSet = true
-    }
-    
+   
     let posts = returnAllPosts(directory: config.postsDirectory)
     
     //  1.  Group the posts

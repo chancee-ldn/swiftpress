@@ -10,6 +10,13 @@ swift build
 ```
 That's it. I've supplied a enough content in the Tests to export a blog with two posts from Mr Samuel Pepes - hopefully this is enough to let you see the inner workings.
 
+
+## Test
+If built from repo:
+```
+.build/x86_64-apple-macosx/debug/swiftpress -c config.md
+```
+
 ## Set up
 
 ### Config file

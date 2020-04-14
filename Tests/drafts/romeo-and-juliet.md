@@ -1,5 +1,5 @@
 ---
-title: Tt is a play of itself the worst that ever I heard in my life
+title: It is a play of itself the worst that ever I heard in my life
 date: 01 Mar 1661 16:58:24 +0000 
 excerpt: 
 tags: London, Romeo and Juliet
