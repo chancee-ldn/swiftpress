@@ -60,8 +60,11 @@ Removed individual options.
 
 ### URL Format
 Uses the `post.title` variable for a title and exports as `postsOutput/YYYYMMDD-post-title.html` .
-These characters are stripped out from the title: `: & ' , ! : `
-These characters are replaced with `-`:  `space / `
+
+`: & ' , ! : `  are stripped out from the title.
+ 
+ `space / ` are replaced with `-`.
+
 
 ### Date Format
 The default is to export European dates `(dd MM yyyy)`.  You can override this by writing a custom date function in the `Post` struct.
