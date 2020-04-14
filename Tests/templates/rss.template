@@ -2,7 +2,7 @@
 	<channel>
 		<title>Swiftpress blog</title>
 		<link>http://chanc.ee</link>
-		<description>/description>
+		<description></description>
 		<generator>swiftpress</generator>
 		<language>en-uk</language>
 		<lastBuildDate>%@</lastBuildDate>

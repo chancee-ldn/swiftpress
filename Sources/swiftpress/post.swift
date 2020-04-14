@@ -40,19 +40,30 @@ struct Post {
     func guid() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "ddMMyyyy"
-        let guid = dateFormatter.string(from: date) + "-" + friendlyURL()
+        let guid = dateFormatter.string(from: date) + "-" + cleanTitle()
         return guid
     }
     
+    // doesn't remove spaces, replaces characters with html entities
+    func titleSafe() -> String {
+        var c = title
+        c = c.replacingOccurrences(of: ",", with: "")
+        c = c.replacingOccurrences(of: "&", with: "&amp;")
+        c = c.replacingOccurrences(of: "!", with: "")
+        c = c.replacingOccurrences(of: ":", with: "")
+        c = c.replacingOccurrences(of: "/", with: "-")
+        
+        return c
+    }
     
-    
-    func friendlyURL() -> String {
+    func cleanTitle() -> String {
         var c = title
         c = c.replacingOccurrences(of: ",", with: "")
         c = c.replacingOccurrences(of: "&", with: "")
-        c = c.replacingOccurrences(of: " ", with: "-")
+        c = c.replacingOccurrences(of: "'", with: "")
         c = c.replacingOccurrences(of: "!", with: "")
         c = c.replacingOccurrences(of: ":", with: "")
+        c = c.replacingOccurrences(of: " ", with: "-")
         c = c.replacingOccurrences(of: "/", with: "-")
         
         c = c.lowercased()

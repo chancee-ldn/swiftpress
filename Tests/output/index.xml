@@ -2,13 +2,13 @@
 	<channel>
 		<title>Swiftpress blog</title>
 		<link>http://chanc.ee</link>
-		<description>/description>
+		<description></description>
 		<generator>swiftpress</generator>
 		<language>en-uk</language>
-		<lastBuildDate>2020-04-10 16:45:04 +0000</lastBuildDate>
+		<lastBuildDate>2020-04-14 07:56:38 +0000</lastBuildDate>
 		<atom:link href="index.xml" rel="self" type="application/rss+xml"/>
 		<item>
-	<title>there-very-merry-and-a-good-dinner</title>
+	<title>There very merry and a good dinner</title>
 	<link></link>
 	<pubDate>1665-02-01 16:58:24 +0000</pubDate>
 	<guid>01021665-there-very-merry-and-a-good-dinner</guid>
@@ -16,7 +16,7 @@
 </description>
 </item>
 <item>
-	<title>tt-is-a-play-of-itself-the-worst-that-ever-i-heard-in-my-life</title>
+	<title>Tt is a play of itself the worst that ever I heard in my life</title>
 	<link></link>
 	<pubDate>1661-03-01 16:58:24 +0000</pubDate>
 	<guid>01031661-tt-is-a-play-of-itself-the-worst-that-ever-i-heard-in-my-life</guid>

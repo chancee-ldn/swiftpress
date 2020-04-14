@@ -268,7 +268,7 @@ func generateRSS(posts: [Post]) {
         for post in posts {
             
             var title = "<item>\n\t<title>%@</title>\n"
-            title = String(format: title, post.friendlyURL())
+            title = String(format: title, post.titleSafe())
                         
             var link = "\t<link>%@</link>\n"
             link = String(format: link, post.link)
@@ -279,16 +279,7 @@ func generateRSS(posts: [Post]) {
             var guid = "\t<guid>%@</guid>\n"
             guid = String(format: guid, post.guid())
             
-            var parser = MarkdownParser()
-            let modifier = Modifier(target: .links) { html, markdown in
-                var trim = html
-                trim = trim.replacingOccurrences(of: "&", with: "&amp;")
-                print (trim)
-                return trim
-            }
-            
-            parser.addModifier(modifier)
-            let body = parser.html(from: post.body)
+            let body = post.body
             
             var description = "\t<description><![CDATA[%@]]>\n</description>\n</item>\n"
             description = String(format: description, String(body))
