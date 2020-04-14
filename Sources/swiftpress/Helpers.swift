@@ -26,14 +26,13 @@ func generateConfig(data: String) {
     let parser = MarkdownParser()
     let result = parser.parse(markdown)
     
-    guard let url = result.metadata["url"] else { print ("Unable to find url in config"); return   }
     guard let outputDirectory = result.metadata["output"] else { print ("Unable to find output directory in config"); return   }
     guard let templateDirectory = result.metadata["templates"] else { print ("Unable to find a template directory in config"); return   }
     guard let postsDirectory = result.metadata["posts"] else { print ("Unable to find a posts directory in config"); return   }
     guard let postsOutputDirectory = result.metadata["postsOutput"] else { print ("Unable to find a posts directory in config"); return }
     guard let frontpage = Int(result.metadata["frontpage"]!) else { print ("Unable to find a posts directory in config"); return }
     
-    let c = Config(url: url, outputDirectory: outputDirectory, templateDirectory: templateDirectory, postsDirectory: postsDirectory, postsOutputDirectory: postsOutputDirectory, frontpage: frontpage)
+    let c = Config(outputDirectory: outputDirectory, templateDirectory: templateDirectory, postsDirectory: postsDirectory, postsOutputDirectory: postsOutputDirectory, frontpage: frontpage)
     config = c
     print ("config set up with an \(config.frontpage) post frontpage")
 }

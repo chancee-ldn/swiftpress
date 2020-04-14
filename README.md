@@ -20,9 +20,10 @@ If built from repo:
 ## Set up
 
 ### Config file
-We need a number of items to produce a blog. Place them in a markdown formatted like the below. Swiftpress will look in it's local directory for `config.md` or you can supply an ad hoc version via `-c` flag. The `url` value is only used in the RSS injection method currently, `frontpage` dictates the number of posts to show on the front page.
+We need a number of items to produce a blog. Place them in a markdown formatted like the below. 
+
+`frontpage` dictates the number of posts to show on the front page.
 ```
-url: https://domain.com
 output: /your/output/directory
 templates: /your/templates/directory
 posts: /your/markdown/posts/directory
