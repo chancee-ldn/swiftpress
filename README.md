@@ -24,11 +24,13 @@ We need a number of items to produce a blog. Place them in a markdown formatted 
 
 `frontpage` dictates the number of posts to show on the front page.
 ```
+---
 output: /your/output/directory
 templates: /your/templates/directory
 posts: /your/markdown/posts/directory
 postsOutput: /your/directory/for/posts
 frontpage: 7
+---
 ```
 
 ### A post
