@@ -26,13 +26,14 @@ func generateConfig(data: String) {
     let parser = MarkdownParser()
     let result = parser.parse(markdown)
     
+    guard let url = result.metadata["url"] else { print ("Unable to find url in config"); return   }
     guard let outputDirectory = result.metadata["output"] else { print ("Unable to find output directory in config"); return   }
     guard let templateDirectory = result.metadata["templates"] else { print ("Unable to find a template directory in config"); return   }
     guard let postsDirectory = result.metadata["posts"] else { print ("Unable to find a posts directory in config"); return   }
     guard let postsOutputDirectory = result.metadata["postsOutput"] else { print ("Unable to find a posts directory in config"); return }
     guard let frontpage = Int(result.metadata["frontpage"]!) else { print ("Unable to find a posts directory in config"); return }
     
-    let c = Config(outputDirectory: outputDirectory, templateDirectory: templateDirectory, postsDirectory: postsDirectory, postsOutputDirectory: postsOutputDirectory, frontpage: frontpage)
+    let c = Config(url: url, outputDirectory: outputDirectory, templateDirectory: templateDirectory, postsDirectory: postsDirectory, postsOutputDirectory: postsOutputDirectory, frontpage: frontpage)
     config = c
     print ("config set up with an \(config.frontpage) post frontpage")
 }
@@ -115,13 +116,44 @@ func writeArchiveList() {
         return d1 < d2
     }
     
-    for month in monthGroups {
+    var c = ""
+    for month in monthGroups.reversed() {
         print (Colours.CORAL + month.key + Colours.base.rawValue)
+        
+
+        // Write the group date
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "en_GB")
+        dateFormatter.dateFormat = "MMM yyyy"
+        
+        let date = dateFormatter.string(from: month.value[0].key)
+        let formattedDate = "<h3>\(date)</h3>"
+        c.append(formattedDate)
+        
         for item in month.value {
             for post in item.value {
+                
+                
                 print (post.title)
+                let headline = "<h2><a href=\"posts/\(post.guid()).html\">\(post.title)</a></h2>"
+                c.append(headline)
             }
         }
+    }
+    
+    do {
+        let path = String(NSString(string:"\(config.templateDirectory)/archive.template").expandingTildeInPath)
+        let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
+        let content = String(format: template, c)
+        let file = String(NSString(string:"\(config.outputDirectory)").expandingTildeInPath + "/posts/index.html")
+        do {
+            try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
+            print (Colours.CORAL + "Frontpage complete, written to: " + Colours.base.rawValue + "\n")
+        } catch {
+            print ("unable to write post to directory")
+        }
+    } catch {
+        
     }
 }
 
@@ -249,7 +281,11 @@ func generateRSS(posts: [Post]) {
             title = String(format: title, post.titleSafe())
                         
             var link = "\t<link>%@</link>\n"
-            link = String(format: link, post.link)
+            if post.link.isEmpty {
+                link = String(format: link, config.url + "/posts/" + post.guid() + ".html")
+            } else {
+                link = String(format: link, post.link)
+            }
             
             var date = "\t<pubDate>%@</pubDate>\n"
             date = String(format: date, post.date.description)

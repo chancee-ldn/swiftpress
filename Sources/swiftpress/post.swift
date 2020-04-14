@@ -11,6 +11,7 @@ import Foundation
 
 
 struct Config {
+    var url: String = ""
     var outputDirectory: String = ""
     var templateDirectory: String = ""
     var postsDirectory: String = ""

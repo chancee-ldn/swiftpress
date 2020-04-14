@@ -1,7 +1,7 @@
 # swiftpress
 
 A simple static blogging system written in Swift. Inspired by [@an0's](https://github.com/an0) [Letterpress](https://github.com/an0/Letterpress). Markdown is powered by [John Sundell's](https://www.swiftbysundell.com) [Ink](https://github.com/JohnSundell/Ink). I made it because the idea of using SQL for a diary seems crazy. Swiftpress is designed to produce a static blog by periodically processing a bunch of markdown files. I run it locally and use cron to rsync to a sever. 
-You can see it in action on my: [blog](https://chanc.ee).
+You can see it in action on my: [blog](https://chanc.ee). It also makes RSS.
 
 
 ## Build
@@ -25,6 +25,7 @@ We need a number of items to produce a blog. Place them in a markdown formatted 
 `frontpage` dictates the number of posts to show on the front page.
 ```
 ---
+url: http://yourdomain.com
 output: /your/output/directory
 templates: /your/templates/directory
 posts: /your/markdown/posts/directory
