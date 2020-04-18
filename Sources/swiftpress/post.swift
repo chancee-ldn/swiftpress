@@ -39,7 +39,7 @@ struct Post {
     
     func guid() -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "ddMMyyyy"
+        dateFormatter.dateFormat = "yyyyMMdd"
         let guid = dateFormatter.string(from: date) + "-" + cleanTitle()
         return guid
     }

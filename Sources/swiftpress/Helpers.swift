@@ -86,9 +86,7 @@ func makePost(data: String) -> Post {
 
 //  MARK: Archive list
 //  Make a list of posts, grouped by month
-func writeArchiveList() {
-    
-    print (Colours.CORAL + "\nWriting archive list" + Colours.base.rawValue)
+func returnArchive() -> [Date : [Post]] {
     var archive = [Date : [Post]]()
     
     let posts = returnAllPosts(directory: config.postsDirectory)
@@ -102,6 +100,11 @@ func writeArchiveList() {
             archive[post.date] = [post]
         }
     }
+    return archive
+}
+
+func formatArchive() -> String {
+    let archive = returnArchive()
     
     let dateFormatter = DateFormatter()
     dateFormatter.locale = Locale(identifier: "en_GB")
@@ -116,11 +119,9 @@ func writeArchiveList() {
         return d1 < d2
     }
     
-    var c = ""
+    var content = ""
     for month in monthGroups.reversed() {
         print (Colours.CORAL + month.key + Colours.base.rawValue)
-        
-
         // Write the group date
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "en_GB")
@@ -128,18 +129,24 @@ func writeArchiveList() {
         
         let date = dateFormatter.string(from: month.value[0].key)
         let formattedDate = "<h3>\(date)</h3>"
-        c.append(formattedDate)
+        content.append(formattedDate)
         
-        for item in month.value {
+        for item in month.value.reversed() {
             for post in item.value {
-                
-                
                 print (post.title)
-                let headline = "<h2><a href=\"posts/\(post.guid()).html\">\(post.title)</a></h2>"
-                c.append(headline)
+                let headline = "<p><a href=\"posts/\(post.guid()).html\">\(post.title)</a></p>"
+                content.append(headline)
             }
         }
     }
+    return content
+}
+
+
+func writeArchiveList() {
+    
+    print (Colours.CORAL + "\nWriting archive list" + Colours.base.rawValue)
+    let c = formatArchive()
     
     do {
         let path = String(NSString(string:"\(config.templateDirectory)/archive.template").expandingTildeInPath)
@@ -248,7 +255,8 @@ func writeFrontPage() {
             }
         }
                 
-        let content = String(format: template, c)
+        let d = formatArchive()
+        let content = String(format: template, c, d)
         let file = String(NSString(string:"\(config.outputDirectory)").expandingTildeInPath + "/index.html")
         do {
             try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
