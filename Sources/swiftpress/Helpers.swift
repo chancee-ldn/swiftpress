@@ -247,7 +247,7 @@ func writeFrontPage() {
                     let headline = "<h2><a href=\"posts/\(post.guid()).html\">\(post.title)</a></h2>"
                     c.append(headline)
                 } else {
-                    let headline = "<h2><a href=\"\(post.link)\">\(post.title)</a></h2>"
+                    let headline = "<h2><a href=\"\(post.link)\"><svg class=\"icon\"><use xlink:href=\"#icon-star\" /></svg>\(post.title)</a></h2>"
                     c.append(headline)
                 }
                 c.append(post.body)
@@ -334,7 +334,18 @@ func writePostToDirectory(post: Post) {
     // 2. Make some content
     do {
         let template = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
-        let content = String(format: template, post.ukDate(), post.title, post.body)
+        
+        // format link for internal or external here
+        var headline = ""
+        if post.link == "" {
+            let c = post.title
+            headline.append(c)
+        } else {
+            let c = "<a href=\"\(post.link)\"><svg class=\"icon\"><use xlink:href=\"#icon-star\" /></svg>\(post.title)</a>"
+            headline.append(c)
+        }
+        
+        let content = String(format: template, post.ukDate(), headline, post.body)
         let file = String(NSString(string:"\(config.postsOutputDirectory)").expandingTildeInPath + "/\(title).html")
         do {
             try content.write(toFile: file, atomically: false, encoding: String.Encoding.utf8)
